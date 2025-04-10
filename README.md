@@ -5,19 +5,35 @@ This project provides a comprehensive analysis of the SimpleDAO smart contract u
 ## Project Structure
 
 ```
-analysis/
-├── contracts/           # Smart contract source files
-│   └── SimpleDAO.sol    # The SimpleDAO contract with Scribble annotations
-├── config/              # Configuration files
-│   ├── scribble.json    # Scribble configuration
-│   └── fuzz.yml         # Diligence fuzzing configuration
-├── test/                # Test files
-│   └── SimpleDAO.test.js # Hardhat tests for SimpleDAO
-├── scripts/             # Utility scripts
-│   └── run_analysis.js  # Script to run the complete analysis
-├── hardhat.config.js    # Hardhat configuration
-└── package.json         # Project dependencies
+├── contracts/          # Smart contract source files
+├── scripts/           # Deployment and analysis scripts
+├── test/             # Test files
+├── instrumented/     # Scribble-instrumented contracts
+├── config/           # Configuration files for tools
+├── artifacts/        # Compiled contract artifacts
+├── cache/           # Hardhat cache
+├── typechain-types/ # TypeScript typings for contracts
+├── hardhat.config.ts # Hardhat configuration
+├── tsconfig.json    # TypeScript configuration
+├── package.json     # Project dependencies and scripts
+└── .fuzz.yml       # Diligence fuzzing configuration
 ```
+
+Key files:
+- `contracts/SimpleDAO.sol`: Main DAO contract implementation
+- `scripts/deploy.ts`: Contract deployment script
+- `scripts/run_analysis.js`: Analysis orchestration script
+- `.fuzz.yml`: Configuration for Diligence fuzzing
+- `hardhat.config.ts`: Hardhat and network configuration
+
+## Available Scripts
+
+- `npm run compile` - Compile the contracts
+- `npm run deploy` - Deploy contracts to local network
+- `npm run instrument` - Instrument contracts with Scribble
+- `npm run fuzz` - Run Diligence fuzzing tests
+- `npm run analyze` - Run full analysis suite
+- `npm test` - Run the test suite
 
 ## Features
 
