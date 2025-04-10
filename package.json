@@ -5,9 +5,11 @@
   "main": "scripts/run_analysis.js",
   "scripts": {
     "test": "hardhat test",
-    "instrument": "scribble contracts/SimpleDAO.sol --output-dir instrumented",
+    "instrument": "eth-scribble contracts/SimpleDAO.sol --output-dir instrumented",
     "fuzz": "diligence fuzz config/fuzz.yml",
-    "analyze": "node scripts/run_analysis.js"
+    "analyze": "node scripts/run_analysis.js",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run --network localhost scripts/deploy.ts"
   },
   "keywords": [
     "ethereum",
@@ -20,11 +22,24 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
-    "@nomicfoundation/hardhat-ethers": "^3.0.0",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@types/chai": "^4.3.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^20.0.0",
     "chai": "^4.3.7",
     "ethers": "^6.1.0",
-    "hardhat": "^2.14.0"
+    "eth-scribble": "^0.0.5",
+    "hardhat": "^2.14.0",
+    "hardhat-gas-reporter": "^1.0.0",
+    "solidity-coverage": "^0.8.0",
+    "ts-node": "^10.9.0",
+    "typechain": "^8.0.0",
+    "typescript": "^5.0.0"
   }
-} 
+}

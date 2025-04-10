@@ -56,16 +56,20 @@ The fuzzing configuration tests the following properties:
 
 - Node.js (v14 or later)
 - npm or yarn
+- Python 3.7 or later
+- pip3
 
 ### Installation
 
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd analysis
-
-# Install dependencies
+(make a venv now at this point if you want)
+# Install Node.js dependencies
 npm install
+
+# Install Python dependencies
+pip3 install -r requirements.txt
 ```
 
 ### Running the Analysis
@@ -78,8 +82,3 @@ npm run analyze
 npm run instrument  # Run Scribble instrumentation
 npm test           # Run Hardhat tests
 npm run fuzz       # Run Diligence fuzzing
-```
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
