@@ -5,7 +5,7 @@
   "main": "scripts/run_analysis.js",
   "scripts": {
     "test": "hardhat test",
-    "instrument": "eth-scribble contracts/SimpleDAO.sol --output-dir instrumented",
+    "instrument": "scribble --output-mode files --utils-output-path instrumented contracts/SimpleDAO.sol",
     "fuzz": "diligence fuzz config/fuzz.yml",
     "analyze": "node scripts/run_analysis.js",
     "compile": "hardhat compile",
