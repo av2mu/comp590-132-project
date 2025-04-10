@@ -54,8 +54,8 @@ contract SimpleDAO {
         admin = msg.sender;
         unchecked {
             if (!(admin == msg.sender)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(0, abi.encode(admin));
-                emit __ScribbleUtilsLib__346.AssertionFailed("001693:0067:000 0: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("001605:0067:000 0: ");
+                assert(false);
             }
         }
     }
@@ -68,24 +68,24 @@ contract SimpleDAO {
         RET_0 = _original_SimpleDAO_createProposal(_description, _votingPeriod);
         unchecked {
             if (!(msg.sender == admin)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(1, abi.encode(admin));
-                emit __ScribbleUtilsLib__346.AssertionFailed("002247:0067:000 1: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("002102:0067:000 1: ");
+                assert(false);
             }
             if (!((_votingPeriod > 0) && (_votingPeriod <= 604800))) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(2, abi.encode(_votingPeriod));
-                emit __ScribbleUtilsLib__346.AssertionFailed("002513:0067:000 2: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("002303:0067:000 2: ");
+                assert(false);
             }
             if (!(proposals[proposalCount].startTime == block.timestamp)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(3, abi.encode(proposalCount));
-                emit __ScribbleUtilsLib__346.AssertionFailed("002784:0067:000 3: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("002509:0067:000 3: ");
+                assert(false);
             }
             if (!(proposals[proposalCount].endTime == (block.timestamp + _votingPeriod))) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(4, abi.encode(proposalCount, _votingPeriod));
-                emit __ScribbleUtilsLib__346.AssertionFailed("003086:0067:000 4: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("002731:0067:000 4: ");
+                assert(false);
             }
             if (!(proposalCount == (_v.old_0 + 1))) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(5, abi.encode(proposalCount));
-                emit __ScribbleUtilsLib__346.AssertionFailed("003335:0067:000 5: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("002915:0067:000 5: ");
+                assert(false);
             }
         }
     }
@@ -110,27 +110,28 @@ contract SimpleDAO {
         _original_SimpleDAO_vote(_proposalId, _support);
         unchecked {
             if (!(tokenBalances[msg.sender] > 0)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("004389:0067:000 6: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("004000:0067:000 6: ");
+                assert(false);
             }
             if (!(block.timestamp >= proposals[_proposalId].startTime)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(7, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("004656:0067:000 7: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("004204:0067:000 7: ");
+                assert(false);
             }
             if (!(block.timestamp <= proposals[_proposalId].endTime)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(8, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("004921:0067:000 8: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("004406:0067:000 8: ");
+                assert(false);
             }
             if (!(!proposals[_proposalId].hasVoted[msg.sender])) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(9, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("005181:0067:000 9: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("004603:0067:000 9: ");
+                assert(false);
             }
             if (!(proposals[_proposalId].hasVoted[msg.sender])) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(10, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("005441:0068:000 10: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("004799:0068:000 10: ");
+                assert(false);
             }
             if (!(_support ? (proposals[_proposalId].yesVotes == (_v.old_1 + tokenBalances[msg.sender])) : (proposals[_proposalId].noVotes == (_v.old_2 + tokenBalances[msg.sender])))) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(11, abi.encode(_support, _proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("005832:0068:000 11: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("005116:0068:000 11: ");
+                assert(false);
             }
         }
     }
@@ -153,16 +154,16 @@ contract SimpleDAO {
         _original_SimpleDAO_finalize(_proposalId);
         unchecked {
             if (!(block.timestamp > proposals[_proposalId].endTime)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(12, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("006898:0068:000 12: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("006118:0068:000 12: ");
+                assert(false);
             }
             if (!(!proposals[_proposalId].executed)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(13, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("007148:0068:000 13: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("006304:0068:000 13: ");
+                assert(false);
             }
             if (!(proposals[_proposalId].executed)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(14, abi.encode(_proposalId));
-                emit __ScribbleUtilsLib__346.AssertionFailed("007397:0068:000 14: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("006489:0068:000 14: ");
+                assert(false);
             }
         }
     }
@@ -180,12 +181,12 @@ contract SimpleDAO {
         _original_SimpleDAO_setTokenBalance(_account, _amount);
         unchecked {
             if (!(msg.sender == admin)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(15, abi.encode(admin));
-                emit __ScribbleUtilsLib__346.AssertionFailed("008238:0068:000 15: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("007272:0068:000 15: ");
+                assert(false);
             }
             if (!(tokenBalances[_account] == _amount)) {
-                emit __ScribbleUtilsLib__346.AssertionFailedData(16, abi.encode(_account, _amount));
-                emit __ScribbleUtilsLib__346.AssertionFailed("008496:0068:000 16: ");
+                emit __ScribbleUtilsLib__346.AssertionFailed("007460:0068:000 16: ");
+                assert(false);
             }
         }
     }

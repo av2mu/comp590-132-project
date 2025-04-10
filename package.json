@@ -1,12 +1,11 @@
 {
   "name": "simpledao-analysis",
   "version": "1.0.0",
-  "description": "Analysis of SimpleDAO contract using Scribble and Diligence fuzzing",
+  "description": "Analysis of SimpleDAO contract using Scribble for formal verification",
   "main": "scripts/run_analysis.js",
   "scripts": {
     "test": "hardhat test",
     "instrument": "scribble --output-mode files --utils-output-path instrumented contracts/SimpleDAO.sol",
-    "fuzz": "diligence fuzz config/fuzz.yml",
     "analyze": "node scripts/run_analysis.js",
     "compile": "hardhat compile",
     "deploy": "hardhat run --network localhost scripts/deploy.ts"
@@ -16,7 +15,6 @@
     "solidity",
     "dao",
     "scribble",
-    "fuzzing",
     "formal-verification"
   ],
   "author": "",

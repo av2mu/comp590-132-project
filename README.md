@@ -1,6 +1,6 @@
 # SimpleDAO Analysis
 
-This project provides a comprehensive analysis of the SimpleDAO smart contract using Scribble for formal verification and Diligence for fuzzing.
+This project provides a comprehensive analysis of the SimpleDAO smart contract using Scribble for formal verification and Mythril for security analysis.
 
 ## Project Structure
 
@@ -15,15 +15,14 @@ This project provides a comprehensive analysis of the SimpleDAO smart contract u
 ├── typechain-types/ # TypeScript typings for contracts
 ├── hardhat.config.ts # Hardhat configuration
 ├── tsconfig.json    # TypeScript configuration
-├── package.json     # Project dependencies and scripts
-└── .fuzz.yml       # Diligence fuzzing configuration
+└── package.json     # Project dependencies and scripts
 ```
 
 Key files:
 - `contracts/SimpleDAO.sol`: Main DAO contract implementation
 - `scripts/deploy.ts`: Contract deployment script
 - `scripts/run_analysis.js`: Analysis orchestration script
-- `.fuzz.yml`: Configuration for Diligence fuzzing
+- `scripts/run_mythril.py`: Mythril security analysis script
 - `hardhat.config.ts`: Hardhat and network configuration
 
 ## Available Scripts
@@ -31,16 +30,16 @@ Key files:
 - `npm run compile` - Compile the contracts
 - `npm run deploy` - Deploy contracts to local network
 - `npm run instrument` - Instrument contracts with Scribble
-- `npm run fuzz` - Run Diligence fuzzing tests
 - `npm run analyze` - Run full analysis suite
 - `npm test` - Run the test suite
+- `python3 scripts/run_mythril.py` - Run Mythril security analysis
 
 ## Features
 
 - **Scribble Annotations**: The SimpleDAO contract is annotated with Scribble specifications to enable formal verification.
+- **Security Analysis**: Mythril is used to perform security analysis on the instrumented contracts.
 - **Comprehensive Testing**: Hardhat tests cover all contract functionality.
-- **Fuzzing**: Diligence fuzzing is configured to test various properties of the contract.
-- **Automated Analysis**: A script to run the complete analysis pipeline.
+- **Automated Analysis**: Scripts to run the complete analysis pipeline.
 
 ## Scribble Annotations
 
@@ -52,19 +51,17 @@ The SimpleDAO contract includes Scribble annotations for:
 - Vote recording and weighting
 - Proposal finalization conditions
 
-## Fuzzing Properties
+## Security Analysis
 
-The fuzzing configuration tests the following properties:
+Mythril performs security analysis on the following aspects:
 
-- Admin-only functions
-- Valid voting periods
-- Correct start and end times
-- Token holder voting rights
-- Voting time window constraints
-- No double voting
-- Vote recording
-- Finalization conditions
-- Token balance management
+- Reentrancy vulnerabilities
+- Integer overflow/underflow
+- Access control issues
+- Unchecked external calls
+- State consistency
+- Gas optimization issues
+- Potential race conditions
 
 ## Getting Started
 
@@ -97,4 +94,20 @@ npm run analyze
 # Or run individual steps
 npm run instrument  # Run Scribble instrumentation
 npm test           # Run Hardhat tests
-npm run fuzz       # Run Diligence fuzzing
+python3 scripts/run_mythril.py  # Run Mythril security analysis
+```
+
+### Mythril Analysis
+
+The Mythril analysis script (`scripts/run_mythril.py`) will:
+
+1. Look for instrumented contracts in the `instrumented/` directory
+2. Run Mythril's security analysis on each contract
+3. Report any potential vulnerabilities or issues found
+4. Provide detailed information about each finding
+
+The analysis includes:
+- Transaction depth: 3
+- Execution timeout: 60 seconds
+- Solver timeout: 60 seconds
+- State space pruning factor: 0.8

@@ -5,7 +5,6 @@ const path = require('path');
 // Configuration
 const CONFIG = {
   scribbleConfig: path.join(__dirname, '../config/scribble.json'),
-  fuzzConfig: path.join(__dirname, '../config/fuzz.yml'),
   contractPath: path.join(__dirname, '../contracts/SimpleDAO.sol'),
   instrumentedPath: path.join(__dirname, '../instrumented'),
   testPath: path.join(__dirname, '../test/SimpleDAO.test.js'),
@@ -15,7 +14,6 @@ const CONFIG = {
 function ensureDirectories() {
   const dirs = [
     path.dirname(CONFIG.scribbleConfig),
-    path.dirname(CONFIG.fuzzConfig),
     path.dirname(CONFIG.contractPath),
     CONFIG.instrumentedPath,
     path.dirname(CONFIG.testPath),
@@ -33,7 +31,7 @@ function ensureDirectories() {
 function runScribble() {
   console.log('Running Scribble instrumentation...');
   try {
-    execSync(`npx scribble ${CONFIG.contractPath} --output-dir ${CONFIG.instrumentedPath}`, { stdio: 'inherit' });
+    execSync(`npx scribble --output-mode files --utils-output-path ${CONFIG.instrumentedPath} ${CONFIG.contractPath}`, { stdio: 'inherit' });
     console.log('Scribble instrumentation completed successfully.');
   } catch (error) {
     console.error('Error running Scribble instrumentation:', error.message);
@@ -53,18 +51,6 @@ function runTests() {
   }
 }
 
-// Run Diligence fuzzing
-function runFuzzing() {
-  console.log('Running Diligence fuzzing...');
-  try {
-    execSync(`npx diligence fuzz ${CONFIG.fuzzConfig}`, { stdio: 'inherit' });
-    console.log('Diligence fuzzing completed successfully.');
-  } catch (error) {
-    console.error('Error running Diligence fuzzing:', error.message);
-    process.exit(1);
-  }
-}
-
 // Main function
 async function main() {
   console.log('Starting SimpleDAO analysis...');
@@ -78,15 +64,10 @@ async function main() {
   // Run Hardhat tests
   runTests();
   
-  // Run Diligence fuzzing
-  runFuzzing();
-  
   console.log('SimpleDAO analysis completed successfully.');
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  }); 
+main().catch(error => {
+  console.error('Error in main:', error);
+  process.exit(1);
+}); 

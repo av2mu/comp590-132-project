@@ -4,6 +4,9 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
+# Python virtual environment
+.venv/
+
 # Hardhat files
 cache/
 artifacts/
@@ -36,7 +39,4 @@ logs/
 *.log
 
 # Instrumented contracts (if using Scribble)
-instrumented/
-
-# Fuzzing results
-fuzz-results/ 
+instrumented/ 
