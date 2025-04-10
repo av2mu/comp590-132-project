@@ -1,0 +1,30 @@
+{
+  "name": "simpledao-analysis",
+  "version": "1.0.0",
+  "description": "Analysis of SimpleDAO contract using Scribble and Diligence fuzzing",
+  "main": "scripts/run_analysis.js",
+  "scripts": {
+    "test": "hardhat test",
+    "instrument": "scribble contracts/SimpleDAO.sol --output-dir instrumented",
+    "fuzz": "diligence fuzz config/fuzz.yml",
+    "analyze": "node scripts/run_analysis.js"
+  },
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "dao",
+    "scribble",
+    "fuzzing",
+    "formal-verification"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "chai": "^4.3.7",
+    "ethers": "^6.1.0",
+    "hardhat": "^2.14.0"
+  }
+} 
