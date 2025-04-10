@@ -63,7 +63,7 @@ The fuzzing configuration tests the following properties:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/av2mu/comp590-132-project.git
 (make a venv now at this point if you want)
 # Install Node.js dependencies
 npm install
