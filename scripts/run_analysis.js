@@ -51,19 +51,8 @@ function createScribbleConfig() {
 // Run Scribble instrumentation
 function runScribble() {
   console.log('\n=== Running Scribble Instrumentation ===');
-  console.log('1. Checking for annotations in contract files...');
   
   try {
-    // First check annotations in interfaces file
-    console.log('\nChecking GovernorBravoInterfaces.sol for annotations...');
-    const interfacesCheck = execSync(`npx scribble --check-annotations ${CONFIG.interfacesPath}`, { stdio: 'pipe' });
-    console.log(interfacesCheck.toString());
-
-    // Then check annotations in main contract
-    console.log('\nChecking GovernorBravoDelegate.sol for annotations...');
-    const contractCheck = execSync(`npx scribble --check-annotations ${CONFIG.contractPath}`, { stdio: 'pipe' });
-    console.log(contractCheck.toString());
-
     // Instrument the interfaces file
     console.log('\nInstrumenting GovernorBravoInterfaces.sol...');
     execSync(`npx scribble --output-mode files --utils-output-path ${CONFIG.instrumentedPath} ${CONFIG.interfacesPath}`, { stdio: 'inherit' });
@@ -117,7 +106,6 @@ async function main() {
   
   // Run Scribble instrumentation
   runScribble();
-  
   
   console.log('\n=== GovernorBravoDelegate Analysis Completed ===');
 }

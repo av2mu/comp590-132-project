@@ -6,33 +6,45 @@ from pathlib import Path
 
 def run_mythril_analysis(contract_path):
     """
-    Run Mythril analysis on a given contract file.
+    Run Mythril analysis on the GovernorBravoDelegate contract with Scribble annotations.
     
     Args:
         contract_path (str): Path to the contract file to analyze
     """
     try:
-        # Run mythril analyze command
+        # Run mythril analyze command with specific parameters for access control analysis
         cmd = [
             "myth",
             "analyze",
             contract_path,
-            "--execution-timeout", "60",  # 60 second timeout
-            "--max-depth", "3",  # Transaction depth
-            "--solver-timeout", "60000",  # 60 second solver timeout
-            "--pruning-factor", "0.8"  # Pruning factor for state space
+            "--execution-timeout", "120",  # 120 second timeout
+            "--max-depth", "5",  # Increased transaction depth for better coverage
+            "--solver-timeout", "120000",  # 120 second solver timeout
+            "--pruning-factor", "0.8",  # Pruning factor for state space
+            "--modules", "access_control,delegatecall,integer",  # Focus on access control and related issues
+            "--parallel-solving",  # Enable parallel solving
+            "--unconstrained-storage",  # Consider storage as unconstrained
+            "--call-depth-limit", "3",  # Limit call depth
+            "--strategy", "dfs",  # Use depth-first search strategy
+            "--transaction-count", "3"  # Number of transactions to analyze
         ]
         
         print(f"Running Mythril analysis on {contract_path}...")
+        print("Focusing on access control properties from Scribble annotations:")
+        print("- msg.sender == admin")
+        print("- msg.sender == pendingAdmin && msg.sender != address(0)")
+        print("- msg.sender == admin || msg.sender == whitelistGuardian")
+        
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         if result.returncode == 0:
-            print("Analysis completed successfully!")
+            print("\nAnalysis completed successfully!")
+            print("Results:")
             print(result.stdout)
         else:
-            print("Analysis found potential issues:")
+            print("\nAnalysis found potential issues:")
             print(result.stdout)
-            print("Errors/Warnings:")
+            print("\nErrors/Warnings:")
             print(result.stderr)
             
     except Exception as e:
@@ -40,24 +52,19 @@ def run_mythril_analysis(contract_path):
         sys.exit(1)
 
 def main():
-    # Get the instrumented contracts directory
-    instrumented_dir = Path("instrumented")
+    # Get the contract paths
     contracts_dir = Path("contracts")
+    governor_contract = contracts_dir / "GovernorBravoDelegate.sol.instrumented"
     
-    if not instrumented_dir.exists():
-        print("Warning: instrumented directory not found. Checking contracts directory...")
-    
-    # Find all .sol files in both directories
-    sol_files = list(instrumented_dir.glob("**/*.sol")) + list(contracts_dir.glob("**/*.sol.instrumented"))
-    
-    if not sol_files:
-        print("No instrumented .sol files found in either the instrumented or contracts directory.")
+    if not governor_contract.exists():
+        print(f"Error: Instrumented contract not found at {governor_contract}")
+        print("Please run Scribble instrumentation first.")
         sys.exit(1)
     
-    # Run analysis on each contract
-    for contract in sol_files:
-        print(f"\nAnalyzing {contract}...")
-        run_mythril_analysis(str(contract))
+    # Run analysis on the Governor contract
+    print("\n=== Starting GovernorBravoDelegate Analysis ===")
+    run_mythril_analysis(str(governor_contract))
+    print("\n=== Analysis Completed ===")
 
 if __name__ == "__main__":
     main() 
