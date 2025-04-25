@@ -48,7 +48,6 @@ def run_mythril_analysis(contract_path, solc_json_path):
             "--call-depth-limit", "3",  # Limit call depth
             "--strategy", "dfs",  # Use depth-first search strategy
             "--transaction-count", "4",  # Increased transaction count for better coverage
-            "--show-all-states"  # Show all states in the analysis
         ]
         
         print(f"Running Mythril analysis on {contract_path}...")
