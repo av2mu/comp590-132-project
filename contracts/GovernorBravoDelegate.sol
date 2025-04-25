@@ -306,7 +306,8 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
       * #if_succeeds msg.sender == admin;
       */
     function _setVotingDelay(uint newVotingDelay) external {
-        require(msg.sender == admin, "GovernorBravo::_setVotingDelay: admin only");
+        //  Removed admin check, allowing anyone to set voting delay
+        // require(msg.sender == admin, "GovernorBravo::_setVotingDelay: admin only");
         require(newVotingDelay >= MIN_VOTING_DELAY && newVotingDelay <= MAX_VOTING_DELAY, "GovernorBravo::_setVotingDelay: invalid voting delay");
         uint oldVotingDelay = votingDelay;
         votingDelay = newVotingDelay;
