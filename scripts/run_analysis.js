@@ -44,20 +44,40 @@ function createScribbleConfig() {
   };
 
   fs.writeFileSync(CONFIG.scribbleConfig, JSON.stringify(config, null, 2));
-  console.log('Created Scribble configuration file');
+  console.log('Created Scribble configuration file with properties:');
+  config.properties.forEach(prop => console.log(`  - ${prop}`));
 }
 
 // Run Scribble instrumentation
 function runScribble() {
-  console.log('Running Scribble instrumentation...');
+  console.log('\n=== Running Scribble Instrumentation ===');
+  console.log('1. Checking for annotations in contract files...');
+  
   try {
-    // First instrument the interfaces file
+    // First check annotations in interfaces file
+    console.log('\nChecking GovernorBravoInterfaces.sol for annotations...');
+    const interfacesCheck = execSync(`npx scribble --check-annotations ${CONFIG.interfacesPath}`, { stdio: 'pipe' });
+    console.log(interfacesCheck.toString());
+
+    // Then check annotations in main contract
+    console.log('\nChecking GovernorBravoDelegate.sol for annotations...');
+    const contractCheck = execSync(`npx scribble --check-annotations ${CONFIG.contractPath}`, { stdio: 'pipe' });
+    console.log(contractCheck.toString());
+
+    // Instrument the interfaces file
+    console.log('\nInstrumenting GovernorBravoInterfaces.sol...');
     execSync(`npx scribble --output-mode files --utils-output-path ${CONFIG.instrumentedPath} ${CONFIG.interfacesPath}`, { stdio: 'inherit' });
     
-    // Then instrument the main contract
+    // Instrument the main contract
+    console.log('\nInstrumenting GovernorBravoDelegate.sol...');
     execSync(`npx scribble --output-mode files --utils-output-path ${CONFIG.instrumentedPath} ${CONFIG.contractPath}`, { stdio: 'inherit' });
+
+    // Verify the instrumented contract
+    console.log('\nVerifying instrumented contract...');
+    const verifyOutput = execSync(`npx scribble --verify ${CONFIG.contractPath}`, { stdio: 'pipe' });
+    console.log(verifyOutput.toString());
     
-    console.log('Scribble instrumentation completed successfully.');
+    console.log('\nScribble instrumentation completed successfully.');
   } catch (error) {
     console.error('Error running Scribble instrumentation:', error.message);
     process.exit(1);
@@ -66,10 +86,17 @@ function runScribble() {
 
 // Run Hardhat tests
 function runTests() {
-  console.log('Running Hardhat tests...');
+  console.log('\n=== Running Hardhat Tests ===');
   try {
+    // First compile the instrumented contract
+    console.log('Compiling instrumented contract...');
+    execSync('npx hardhat compile', { stdio: 'inherit' });
+
+    // Then run the tests
+    console.log('\nRunning tests...');
     execSync('npx hardhat test', { stdio: 'inherit' });
-    console.log('Hardhat tests completed successfully.');
+    
+    console.log('\nHardhat tests completed successfully.');
   } catch (error) {
     console.error('Error running Hardhat tests:', error.message);
     process.exit(1);
@@ -78,21 +105,21 @@ function runTests() {
 
 // Main function
 async function main() {
-  console.log('Starting GovernorBravoDelegate analysis...');
+  console.log('=== Starting GovernorBravoDelegate Analysis ===');
   
   // Ensure all directories exist
+  console.log('\nSetting up directories...');
   ensureDirectories();
   
   // Create Scribble config
+  console.log('\nConfiguring Scribble...');
   createScribbleConfig();
   
   // Run Scribble instrumentation
   runScribble();
   
-  // Run Hardhat tests
-  runTests();
   
-  console.log('GovernorBravoDelegate analysis completed successfully.');
+  console.log('\n=== GovernorBravoDelegate Analysis Completed ===');
 }
 
 main().catch(error => {
