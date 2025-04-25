@@ -1,11 +1,11 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const SimpleDAO = await ethers.getContractFactory("SimpleDAO");
-  const dao = await SimpleDAO.deploy();
-  await dao.waitForDeployment();
+  const GovBravoDelegate = await ethers.getContractFactory("GovernorBravoDelegate");
+  const govBravoDelegate = await GovBravoDelegate.deploy();
+  await govBravoDelegate.waitForDeployment();
 
-  console.log("SimpleDAO deployed to:", await dao.getAddress());
+  console.log("GovernorBravoDelegate deployed to:", await govBravoDelegate.getAddress());
 }
 
 main().catch((error) => {
