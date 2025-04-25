@@ -13,9 +13,7 @@ def create_solc_json():
             "enabled": True,
             "runs": 200
         },
-        "solc": {
-            "version": "0.8.10"
-        }
+        "version": "0.8.10"
     }
     
     config_path = Path("config/solc.json")
