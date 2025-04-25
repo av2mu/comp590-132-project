@@ -5,9 +5,9 @@ const path = require('path');
 // Configuration
 const CONFIG = {
   scribbleConfig: path.join(__dirname, '../config/scribble.json'),
-  contractPath: path.join(__dirname, '../contracts/SimpleDAO.sol'),
+  contractPath: path.join(__dirname, '../contracts/GovernorBravoDelegate.sol'),
   instrumentedPath: path.join(__dirname, '../instrumented'),
-  testPath: path.join(__dirname, '../test/SimpleDAO.test.js'),
+  testPath: path.join(__dirname, '../test/GovernorBravoDelegate.test.js'),
 };
 
 // Ensure directories exist
