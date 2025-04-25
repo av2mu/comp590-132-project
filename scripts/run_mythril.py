@@ -21,31 +21,66 @@ def run_mythril_analysis(contract_path):
             "--max-depth", "5",  # Increased transaction depth for better coverage
             "--solver-timeout", "120000",  # 120 second solver timeout
             "--pruning-factor", "0.8",  # Pruning factor for state space
-            "--modules", "access_control,delegatecall,integer",  # Focus on access control and related issues
+            "--modules", "access_control",  # Focus specifically on access control
             "--parallel-solving",  # Enable parallel solving
             "--unconstrained-storage",  # Consider storage as unconstrained
             "--call-depth-limit", "3",  # Limit call depth
             "--strategy", "dfs",  # Use depth-first search strategy
-            "--transaction-count", "3"  # Number of transactions to analyze
+            "--transaction-count", "3",  # Number of transactions to analyze
+            "--verbose",  # Enable verbose output
+            "--show-all-states",  # Show all states in the analysis
+            "--enable-iprof",  # Enable instruction profiling
+            "--enable-coverage-strategy",  # Enable coverage strategy
+            "--enable-summaries",  # Enable function summaries
+            "--enable-dependency-pruning",  # Enable dependency pruning
+            "--enable-physics",  # Enable physics-based analysis
+            "--enable-constraint-solving"  # Enable constraint solving
         ]
         
         print(f"Running Mythril analysis on {contract_path}...")
-        print("Focusing on access control properties from Scribble annotations:")
+        print("\nFocusing on access control properties from Scribble annotations:")
         print("- msg.sender == admin")
         print("- msg.sender == pendingAdmin && msg.sender != address(0)")
         print("- msg.sender == admin || msg.sender == whitelistGuardian")
+        print("\nAnalysis parameters:")
+        print("  - Execution timeout: 120 seconds")
+        print("  - Max depth: 5")
+        print("  - Solver timeout: 120 seconds")
+        print("  - Strategy: DFS")
+        print("  - Transaction count: 3")
+        print("  - Modules: access_control")
         
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        # Run the command with real-time output
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            bufsize=1
+        )
         
-        if result.returncode == 0:
-            print("\nAnalysis completed successfully!")
-            print("Results:")
-            print(result.stdout)
+        print("\n=== Analysis Progress ===")
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                print(output.strip())
+        
+        # Get the final return code
+        return_code = process.poll()
+        
+        print("\n=== Analysis Results ===")
+        if return_code == 0:
+            print("Analysis completed successfully!")
         else:
-            print("\nAnalysis found potential issues:")
-            print(result.stdout)
-            print("\nErrors/Warnings:")
-            print(result.stderr)
+            print("Analysis found potential issues!")
+            
+        # Print any remaining stderr output
+        stderr_output = process.stderr.read()
+        if stderr_output:
+            print("\nError Output:")
+            print(stderr_output)
             
     except Exception as e:
         print(f"Error running Mythril analysis: {str(e)}")
