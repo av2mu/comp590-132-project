@@ -2,14 +2,34 @@
 import os
 import subprocess
 import sys
+import json
 from pathlib import Path
 
-def run_mythril_analysis(contract_path):
+def create_solc_json():
+    """Create solc-json file for Mythril compilation"""
+    solc_config = {
+        "remappings": [],
+        "optimizer": {
+            "enabled": True,
+            "runs": 200
+        }
+    }
+    
+    config_path = Path("config/solc.json")
+    config_path.parent.mkdir(exist_ok=True)
+    
+    with open(config_path, 'w') as f:
+        json.dump(solc_config, f, indent=2)
+    
+    return str(config_path)
+
+def run_mythril_analysis(contract_path, solc_json_path):
     """
     Run Mythril analysis on the GovernorBravoDelegate contract with Scribble annotations.
     
     Args:
         contract_path (str): Path to the contract file to analyze
+        solc_json_path (str): Path to solc-json configuration
     """
     try:
         # Run mythril analyze command with specific parameters for access control analysis
@@ -17,6 +37,7 @@ def run_mythril_analysis(contract_path):
             "myth",
             "analyze",
             contract_path,
+            "--solc-json", solc_json_path,
             "--execution-timeout", "120",  # 120 second timeout
             "--max-depth", "5",  # Increased transaction depth for better coverage
             "--solver-timeout", "120000",  # 120 second solver timeout
@@ -26,15 +47,8 @@ def run_mythril_analysis(contract_path):
             "--unconstrained-storage",  # Consider storage as unconstrained
             "--call-depth-limit", "3",  # Limit call depth
             "--strategy", "dfs",  # Use depth-first search strategy
-            "--transaction-count", "3",  # Number of transactions to analyze
-            "--verbose",  # Enable verbose output
-            "--show-all-states",  # Show all states in the analysis
-            "--enable-iprof",  # Enable instruction profiling
-            "--enable-coverage-strategy",  # Enable coverage strategy
-            "--enable-summaries",  # Enable function summaries
-            "--enable-dependency-pruning",  # Enable dependency pruning
-            "--enable-physics",  # Enable physics-based analysis
-            "--enable-constraint-solving"  # Enable constraint solving
+            "--transaction-count", "4",  # Increased transaction count for better coverage
+            "--show-all-states"  # Show all states in the analysis
         ]
         
         print(f"Running Mythril analysis on {contract_path}...")
@@ -47,7 +61,7 @@ def run_mythril_analysis(contract_path):
         print("  - Max depth: 5")
         print("  - Solver timeout: 120 seconds")
         print("  - Strategy: DFS")
-        print("  - Transaction count: 3")
+        print("  - Transaction count: 4")
         print("  - Modules: access_control")
         
         # Run the command with real-time output
@@ -96,9 +110,13 @@ def main():
         print("Please run Scribble instrumentation first.")
         sys.exit(1)
     
+    # Create solc-json configuration
+    print("\nCreating solc-json configuration...")
+    solc_json_path = create_solc_json()
+    
     # Run analysis on the Governor contract
     print("\n=== Starting GovernorBravoDelegate Analysis ===")
-    run_mythril_analysis(str(governor_contract))
+    run_mythril_analysis(str(governor_contract), solc_json_path)
     print("\n=== Analysis Completed ===")
 
 if __name__ == "__main__":
