@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import "./GovernorBravoInterfaces.sol";
 
+/// @custom:scribble #if_succeeds msg.sender == admin;
 contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoEvents {
 
     /// @notice The name of this contract
@@ -302,6 +303,7 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
     /**
       * @notice Admin function for setting the voting delay
       * @param newVotingDelay new voting delay, in blocks
+      * @custom:scribble #if_succeeds msg.sender == admin;
       */
     function _setVotingDelay(uint newVotingDelay) external {
         require(msg.sender == admin, "GovernorBravo::_setVotingDelay: admin only");
@@ -315,6 +317,7 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
     /**
       * @notice Admin function for setting the voting period
       * @param newVotingPeriod new voting period, in blocks
+      * @custom:scribble #if_succeeds msg.sender == admin;
       */
     function _setVotingPeriod(uint newVotingPeriod) external {
         require(msg.sender == admin, "GovernorBravo::_setVotingPeriod: admin only");
@@ -329,6 +332,7 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
       * @notice Admin function for setting the proposal threshold
       * @dev newProposalThreshold must be greater than the hardcoded min
       * @param newProposalThreshold new proposal threshold
+      * @custom:scribble #if_succeeds msg.sender == admin;
       */
     function _setProposalThreshold(uint newProposalThreshold) external {
         require(msg.sender == admin, "GovernorBravo::_setProposalThreshold: admin only");
@@ -340,9 +344,10 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
     }
 
     /**
-     * @notice Admin function for setting the whitelist expiration as a timestamp for an account. Whitelist status allows accounts to propose without meeting threshold
+     * @notice Admin function for setting the whitelist expiration as a timestamp for an account
      * @param account Account address to set whitelist expiration for
-     * @param expiration Expiration for account whitelist status as timestamp (if now < expiration, whitelisted)
+     * @param expiration Expiration for account whitelist status as timestamp
+     * @custom:scribble #if_succeeds msg.sender == admin || msg.sender == whitelistGuardian;
      */
     function _setWhitelistAccountExpiration(address account, uint expiration) external {
         require(msg.sender == admin || msg.sender == whitelistGuardian, "GovernorBravo::_setWhitelistAccountExpiration: admin only");
@@ -352,8 +357,9 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
     }
 
     /**
-     * @notice Admin function for setting the whitelistGuardian. WhitelistGuardian can cancel proposals from whitelisted addresses
-     * @param account Account to set whitelistGuardian to (0x0 to remove whitelistGuardian)
+     * @notice Admin function for setting the whitelistGuardian
+     * @param account Account to set whitelistGuardian to
+     * @custom:scribble #if_succeeds msg.sender == admin;
      */
      function _setWhitelistGuardian(address account) external {
         require(msg.sender == admin, "GovernorBravo::_setWhitelistGuardian: admin only");
@@ -365,8 +371,9 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
 
     /**
       * @notice Initiate the GovernorBravo contract
-      * @dev Admin only. Sets initial proposal id which initiates the contract, ensuring a continuous proposal id count
+      * @dev Admin only. Sets initial proposal id which initiates the contract
       * @param governorAlpha The address for the Governor to continue the proposal id count from
+      * @custom:scribble #if_succeeds msg.sender == admin;
       */
     function _initiate(address governorAlpha) external {
         require(msg.sender == admin, "GovernorBravo::_initiate: admin only");
@@ -377,9 +384,9 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
     }
 
     /**
-      * @notice Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-      * @dev Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
-      * @param newPendingAdmin New pending admin.
+      * @notice Begins transfer of admin rights
+      * @param newPendingAdmin New pending admin
+      * @custom:scribble #if_succeeds msg.sender == admin;
       */
     function _setPendingAdmin(address newPendingAdmin) external {
         // Check caller = admin
@@ -396,8 +403,8 @@ contract GovernorBravoDelegate is GovernorBravoDelegateStorageV2, GovernorBravoE
     }
 
     /**
-      * @notice Accepts transfer of admin rights. msg.sender must be pendingAdmin
-      * @dev Admin function for pending admin to accept role and update admin
+      * @notice Accepts transfer of admin rights
+      * @custom:scribble #if_succeeds msg.sender == pendingAdmin && msg.sender != address(0);
       */
     function _acceptAdmin() external {
         // Check caller is pendingAdmin and pendingAdmin ≠ address(0)
