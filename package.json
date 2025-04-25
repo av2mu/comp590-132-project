@@ -1,11 +1,11 @@
 {
-  "name": "simpledao-analysis",
+  "name": "GovernorBravoDelegate",
   "version": "1.0.0",
-  "description": "Analysis of SimpleDAO contract using Scribble for formal verification",
+  "description": "Analysis of GovernorBravoDelegate contract using Scribble for formal verification",
   "main": "scripts/run_analysis.js",
   "scripts": {
     "test": "hardhat test",
-    "instrument": "scribble --output-mode files --utils-output-path instrumented contracts/SimpleDAO.sol",
+    "instrument": "scribble --output-mode files --utils-output-path instrumented contracts/GovernorBravoDelegate.sol",
     "analyze": "node scripts/run_analysis.js",
     "compile": "hardhat compile",
     "deploy": "hardhat run --network localhost scripts/deploy.ts"
