@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.29;
 
-import "./AuthorizationSpec.sol";
-
 /// @title SimpleDAO
 /// @notice A simple flawed DAO voting mechanism with wallet-based voting
-/// @dev Uses Scribble annotations for formal verification
-contract SimpleDAO is AuthorizationSpec {
+contract SimpleDAO {
     event ProposalCreated(uint256 indexed proposalId, string description);
     event VoteCast(uint256 indexed proposalId, address indexed voter, bool support);
     event ProposalExecuted(uint256 indexed proposalId, bool passed);
