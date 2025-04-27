@@ -87,6 +87,8 @@ $M = (Q, \Sigma, \delta, q_0, F)$
 
 With $Q$ being the set of contract states, $\Sigma$ being the set of events, $\delta$ being the transition function mapping $Q\times\Sigma$, $q_0$ being the initial state, and $F$ being the set of terminal states. 
 We define the set $Q$ as follows:
+\begin{figure}[h]
+\caption{\textbf{The set $Q$}}
 \begin{center}
 \begin{tabular}{|c|c|}
 \hline
@@ -106,14 +108,17 @@ R & Vote canceled. Terminate interaction\\
 \hline
 \end{tabular}
 \end{center}
+\end{figure}
 
 And define the set $Sigma$ as follows:
+\begin{figure}[h]
+\caption{\textbf{The set $\Sigma$}}
 \begin{center}
 \begin{tabular}{|c|c|}
 \hline
 Event & Description\\
 \hline
-Vote function called & Member makes request to contract\\
+Function called & Member makes request to contract\\
 \hline
 Vote validated & Vote request validated (explained below)\\
 \hline
@@ -125,8 +130,10 @@ Vote rejected & Vote request is invalid (explained below)\\
 \hline
 \end{tabular}
 \end{center}
+\end{figure}
 
-And finally provide a diagram of the finite state machine.
+And finally provide a diagram of the finite state machine for the transition function (Figure 1). Terminating states are indicated with double rings.
+\begin{figure}[h]
 \begin{center}
 \begin{tikzpicture}[scale=0.2]
 \tikzstyle{every node}+=[inner sep=0pt]
@@ -162,23 +169,20 @@ And finally provide a diagram of the finite state machine.
 \draw (32.01,-38.28) node [left] {$Vote\mbox{ }yes$};
 \end{tikzpicture}
 \end{center}
+\caption{DAO Voting contract Finite State Machine}
+\end{figure}
 
 This formal model provides the foundation for our conception of DAO smart contracts. As our goal is to verify the voting functionality of DAOs, it follows that we are focused primarily on the \textit{Vote Validated} event transition, and this is where most of our verification efforts will take place. Defining what it means for a vote to be validated will lead us to introduce our security properties.
 
 \subsection{Security Properties for Secure DAO Voting}
+We define three properties for a secure DAO voting system:
+\begin{enumerate}
+    \item Singular Vote: A single member of the DAO should not be able to vote more than once, or have their vote count for more than one vote.
+    \item Vote Authorization: Anyone can make a vote request using the contract, but only DAO members (holders of the particular DAO token) should be able to vote.
+    \item Vote Finality: Once the interaction between the member and the DAO contract is finished, the vote count should not revert or otherwise be changed by the actions of another member.
+\end{enumerate}
 
-\section{Approach}
-Our approach uses Scribble and Mythril together to formally verify critical correctness properties in Ethereum-based DAO voting contracts. To begin, we identify essential governance rules found in most DAO implementations and articulate them into specific safety and liveness properties. Some key requirements include only token holders being able to vote, as well as prevention of double counting votes. These rules are expressed through Scribble annotations, which convert informal governance assumptions into precise assertions that are embedded into the Solidity contract. 
-
-Our verification approach targets three core properties critical to DAO smart contract security. First, we verify Single Vote Enforcement, confirming that each member is restricted to casting only one vote per proposal, preventing potential manipulation through multiple votes. Second, we ensure Authorized Access, validating that voting and proposal functionalities are limited exclusively to authorized DAO members, thus safeguarding against unauthorized interference. Lastly, we confirm Integrity of Proposal Outcome, ensuring the correctness and immutability of voting results once finalized, to protect decision-making from fraudulent or erroneous alterations. We annotate each property explicitly using Scribble, enabling Mythril to systematically verify these essential conditions.
-
-Once the properties are specified, we recompile the smart contract code using Scribble, then analyze it using Mythril’s symbolic execution engine. Mythril traverses possible execution paths, trying to invalidate the assertions that were defined earlier. If any violation is discovered by Mythril, it returns a counterexample and a symbolic execution path that led to the issue.
-
-Upon encountering counterexamples, we analyze whether these findings represent genuine logic flaws or overly restrictive specifications. If there is a genuine logic flaw, we will flag it for review, while the latter will cause us to refine our annotations. We will evaluate the performance of our verification framework by testing it on both authentic DAO contracts and synthetic contracts that are injected with known vulnerabilities. Our goal is to produce a streamlined workflow that runs lightweight yet rigorous annotation-driven formal verification to ensure that Ethereum-based DAO governance contracts are secure.
-
-We will first test synthetically vulnerable smart contracts specifically designed to contain known security flaws related to DAO voting. This initial step allows us to validate the correctness of our verification techniques in detecting deliberate vulnerabilities. After establishing confidence in our methodology, we will progress to analyzing a realistic and manageable contract such as MolochDAO v2[14], to test our verification framework in a practical but simplified real-world scenario.
-
-We began by successfully setting up Mythril and integrating Scribble annotations for formal verification. To validate our setup, we created a simplified DAO smart contract example, incorporating core DAO functionalities. We annotated the critical sections using Scribble to define security properties explicitly. Running Mythril against this annotated DAO allowed us to verify that our environment and workflow operate correctly, establishing a solid foundation for further verification of more complex real-world DAOs.
+Properties 1 and 2 are collectively bundled as part of the \textit{Vote Validated} DAO contract event. Property 3 is covered in our model by the terminating path of execution and lack of looping. Each call of the vote function is treated as a separate execution. 
 
 \section{Implementation}
 To be written

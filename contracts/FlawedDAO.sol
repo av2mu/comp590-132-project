@@ -2,7 +2,7 @@
 pragma solidity ^0.8.29;
 
 /// @title SimpleDAO
-/// @notice A simple DAO voting mechanism with token-weighted voting
+/// @notice A simple flawed DAO voting mechanism with wallet-based voting
 contract SimpleDAO {
     event ProposalCreated(uint256 indexed proposalId, string description);
     event VoteCast(uint256 indexed proposalId, address indexed voter, bool support);
@@ -22,6 +22,7 @@ contract SimpleDAO {
     mapping(uint256 => Proposal) public proposals;
     mapping(address => uint256) public tokenBalances;
     uint256 public proposalCount;
+
 
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin can call this function");
@@ -47,18 +48,16 @@ contract SimpleDAO {
         emit ProposalCreated(proposalId, _description);
         return proposalId;
     }
-
-    function vote(uint256 _proposalId, bool _support) external onlyTokenHolder {
+    // Intended functionality is that each user with tokens may vote once on a proposal
+    // Flawed logic in not checking if the user owns tokens or if they have already voted
+    // Additionally the status of the proposal is never checked, allowing for changes to vote count after finalization
+    function vote(uint256 _proposalId, bool _support) {
         Proposal storage proposal = proposals[_proposalId];
-        require(block.timestamp >= proposal.startTime, "Voting not started");
-        require(block.timestamp <= proposal.endTime, "Voting ended");
-        require(!proposal.hasVoted[msg.sender], "Already voted");
-        require(!proposal.executed, "Proposal already finalized");
         proposal.hasVoted[msg.sender] = true;
         if (_support) {
-            proposal.yesVotes += tokenBalances[msg.sender];
+            proposal.yesVotes += 1;
         } else {
-            proposal.noVotes += tokenBalances[msg.sender];
+            proposal.noVotes += 1;
         }
         emit VoteCast(_proposalId, msg.sender, _support);
     }
@@ -71,6 +70,7 @@ contract SimpleDAO {
         bool passed = proposal.yesVotes > proposal.noVotes;
         emit ProposalExecuted(_proposalId, passed);
     }
+
 
     function setTokenBalance(address _account, uint256 _amount) external onlyAdmin {
         tokenBalances[_account] = _amount;
