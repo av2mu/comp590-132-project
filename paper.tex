@@ -77,67 +77,94 @@ Decentralized Autonomous Organizations (DAOs) use the blockchain and smart contr
 DAO contract voting vulnerabilities refers to a class of vulnerabilities where an attacker exploits the contract voting mechanism to vote twice with the same tokens, remove other people's votes, vote on a proposal and immediately put it into effect without giving other token holders a chance to vote themselves, or other similar exploits that undermine the decentralized democratic goals of DAO contracts. In our analysis, we assume that attackers have complete visibility of the contract code, and the ability to deploy their own contracts to the blockchain that interface with DAO contracts[13]; however, we are assuming that attackers cannot launch larger Ethereum network attacks such as network congestion or miner manipulation that would require greater coordination and resources. We consider nonvoting-related attacks such as integer overflow, reentrancy, and gas DoS attacks as out of scope for this paper. 
 
 \section{Design}
-\subsection{Defining security properties for DAO smart contracts}
+
+\subsection{A Formal Model of DAO Smart Contracts}
+There is not a prescriptive structure that smart contracts must conform to in order to be considered DAOs, but there are some functionalities that are common to all implementations. All DAOs have a voting function in their contract that allows members to vote on proposals made by other members. We represent the general form of this voting function as a finite state machine that DAO members can interact with. We define the FSM as follows:
 \begin{center}
-\begin{tikzpicture}[scale=0.15]
+$M = (Q, \Sigma, \delta, q_0, F)$
+\end{center}
+
+With $Q$ being the set of contract states, $\Sigma$ being the set of events, $\delta$ being the transition function mapping $Q\times\Sigma$, $q_0$ being the initial state, and $F$ being the set of terminal states. 
+We define the set $Q$ as follows:
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+State & Description\\
+\hline
+$q_0$ & Initial state. Contract is inert.\\
+\hline
+A & Vote request initiated. Voter identity set\\
+\hline
+B & Vote request validated\\
+\hline
+Y & Vote total updated in favor. Terminate interaction \\
+\hline
+N & Vote total updated against. Terminate interaction\\
+\hline
+R & Vote canceled. Terminate interaction\\
+\hline
+\end{tabular}
+\end{center}
+
+And define the set $Sigma$ as follows:
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Event & Description\\
+\hline
+Vote function called & Member makes request to contract\\
+\hline
+Vote validated & Vote request validated (explained below)\\
+\hline
+Vote yes & Member votes in favor \\
+\hline
+Vote no & Member votes against\\
+\hline
+Vote rejected & Vote request is invalid (explained below)\\
+\hline
+\end{tabular}
+\end{center}
+
+And finally provide a diagram of the finite state machine.
+\begin{center}
+\begin{tikzpicture}[scale=0.2]
 \tikzstyle{every node}+=[inner sep=0pt]
-\draw [black] (9,-32.6) circle (3);
-\draw (9,-32.6) node {$s_1,s_2$};
-\draw [black] (23.6,-16) circle (3);
-\draw (23.6,-16) node {$D_1$};
-\draw [black] (23.6,-49.3) circle (3);
-\draw (23.6,-49.3) node {$W_1$};
-\draw [black] (42.4,-16) circle (3);
-\draw (42.4,-16) node {$D_2$};
-\draw [black] (57.2,-16) circle (3);
-\draw (57.2,-16) node {$D_3$};
-\draw [black] (43.6,-49.3) circle (3);
-\draw (43.6,-49.3) node {$W_2$};
-\draw [black] (57.2,-49.3) circle (3);
-\draw (57.2,-49.3) node {$W_3$};
-\draw [black] (46.4,-32.6) circle (3);
-\draw (46.4,-32.6) node {$I$};
-\draw [black] (28.7,-32.6) circle (3);
-\draw (28.7,-32.6) node {$R$};
-\draw [black] (10.98,-30.35) -- (21.62,-18.25);
-\fill [black] (21.62,-18.25) -- (20.71,-18.52) -- (21.47,-19.18);
-\draw (16.84,-25.75) node [right] {$a_1$};
-\draw [black] (10.97,-34.86) -- (21.63,-47.04);
-\fill [black] (21.63,-47.04) -- (21.48,-46.11) -- (20.72,-46.77);
-\draw (16.84,-39.5) node [right] {$a_2$};
-\draw [black] (26.6,-16) -- (39.4,-16);
-\fill [black] (39.4,-16) -- (38.6,-15.5) -- (38.6,-16.5);
-\draw (33,-16.5) node [below] {$c_1$};
-\draw [black] (45.4,-16) -- (54.2,-16);
-\fill [black] (54.2,-16) -- (53.4,-15.5) -- (53.4,-16.5);
-\draw (49.8,-16.5) node [below] {$d_1$};
-\draw [black] (26.6,-49.3) -- (40.6,-49.3);
-\fill [black] (40.6,-49.3) -- (39.8,-48.8) -- (39.8,-49.8);
-\draw (33.6,-49.8) node [below] {$c_2$};
-\draw [black] (46.6,-49.3) -- (54.2,-49.3);
-\fill [black] (54.2,-49.3) -- (53.4,-48.8) -- (53.4,-49.8);
-\draw (50.4,-49.8) node [below] {$d_2$};
-\draw [black] (8.934,-29.602) arc (-182.00565:-319.9871:26.325);
-\fill [black] (8.93,-29.6) -- (9.46,-28.82) -- (8.46,-28.79);
-\draw [black] (55.065,-51.406) arc (-48.49526:-169.72438:27.748);
-\fill [black] (9.37,-35.58) -- (9.03,-36.45) -- (10.01,-36.27);
-\draw [black] (43.4,-32.6) -- (31.7,-32.6);
-\fill [black] (31.7,-32.6) -- (32.5,-33.1) -- (32.5,-32.1);
-\draw (37.55,-33.1) node [below] {$f$};
-\draw [black] (24.48,-18.87) -- (27.82,-29.73);
-\fill [black] (27.82,-29.73) -- (28.06,-28.82) -- (27.11,-29.11);
-\draw (25.38,-24.93) node [left] {$b_1$};
-\draw [black] (24.48,-46.43) -- (27.82,-35.47);
-\fill [black] (27.82,-35.47) -- (27.11,-36.09) -- (28.07,-36.38);
-\draw (26.92,-41.57) node [right] {$b_2$};
-\draw [black] (43.1,-18.92) -- (45.7,-29.68);
-\fill [black] (45.7,-29.68) -- (46,-28.79) -- (45.02,-29.02);
-\draw (43.64,-24.73) node [left] {$e_1$};
-\draw [black] (44.1,-46.34) -- (45.9,-35.56);
-\fill [black] (45.9,-35.56) -- (45.28,-36.27) -- (46.26,-36.43);
-\draw (45.71,-41.18) node [right] {$e_2$};
+\draw [black] (36.9,-9.6) circle (3);
+\draw (36.9,-9.6) node {$q_0$};
+\draw [black] (36.9,-22) circle (3);
+\draw (36.9,-22) node {$A$};
+\draw [black] (36.9,-33.6) circle (3);
+\draw (36.9,-33.6) node {$B$};
+\draw [black] (55.8,-22) circle (3);
+\draw (55.8,-22) node {$R$};
+\draw [black] (55.8,-22) circle (2.4);
+\draw [black] (45.7,-45.7) circle (3);
+\draw (45.7,-45.7) node {$N$};
+\draw [black] (45.7,-45.7) circle (2.4);
+\draw [black] (28.3,-45.7) circle (3);
+\draw (28.3,-45.7) node {$Y$};
+\draw [black] (28.3,-45.7) circle (2.4);
+\draw [black] (36.9,-12.6) -- (36.9,-19);
+\fill [black] (36.9,-19) -- (37.4,-18.2) -- (36.4,-18.2);
+\draw (36.4,-15.8) node [left] {$Vote\mbox{ }function\mbox{ }called$};
+\draw [black] (36.9,-25) -- (36.9,-30.6);
+\fill [black] (36.9,-30.6) -- (37.4,-29.8) -- (36.4,-29.8);
+\draw (36.4,-27.8) node [left] {$Vote\mbox{ }validated$};
+\draw [black] (39.9,-22) -- (52.8,-22);
+\fill [black] (52.8,-22) -- (52,-21.5) -- (52,-22.5);
+\draw (46.35,-22.5) node [below] {$Vote\mbox{ }rejected$};
+\draw [black] (38.66,-36.03) -- (43.94,-43.27);
+\fill [black] (43.94,-43.27) -- (43.87,-42.33) -- (43.06,-42.92);
+\draw (41.89,-38.27) node [right] {$Vote\mbox{ }no$};
+\draw [black] (35.16,-36.05) -- (30.04,-43.25);
+\fill [black] (30.04,-43.25) -- (30.91,-42.89) -- (30.09,-42.31);
+\draw (32.01,-38.28) node [left] {$Vote\mbox{ }yes$};
 \end{tikzpicture}
 \end{center}
+
+This formal model provides the foundation for our conception of DAO smart contracts. As our goal is to verify the voting functionality of DAOs, it follows that we are focused primarily on the \textit{Vote Validated} event transition, and this is where most of our verification efforts will take place. Defining what it means for a vote to be validated will lead us to introduce our security properties.
+
+\subsection{Security Properties for Secure DAO Voting}
 
 \section{Approach}
 Our approach uses Scribble and Mythril together to formally verify critical correctness properties in Ethereum-based DAO voting contracts. To begin, we identify essential governance rules found in most DAO implementations and articulate them into specific safety and liveness properties. Some key requirements include only token holders being able to vote, as well as prevention of double counting votes. These rules are expressed through Scribble annotations, which convert informal governance assumptions into precise assertions that are embedded into the Solidity contract. 
