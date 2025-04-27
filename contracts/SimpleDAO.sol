@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.29;
 
+import "./AuthorizationSpec.sol";
+
 /// @title SimpleDAO
 /// @notice A simple DAO voting mechanism with token-weighted voting
 /// @dev Uses Scribble annotations for formal verification
-contract SimpleDAO {
+contract SimpleDAO is AuthorizationSpec {
     event ProposalCreated(uint256 indexed proposalId, string description);
     event VoteCast(uint256 indexed proposalId, address indexed voter, bool support);
     event ProposalExecuted(uint256 indexed proposalId, bool passed);
@@ -23,6 +25,11 @@ contract SimpleDAO {
     mapping(uint256 => Proposal) public proposals;
     mapping(address => uint256) public tokenBalances;
     uint256 public proposalCount;
+
+    /// @inheritdoc AuthorizationSpec
+    function isEligibleVoter(address voter) internal view override returns (bool) {
+        return tokenBalances[voter] > 0;
+    }
 
     /// #if_succeeds msg.sender == admin;
     modifier onlyAdmin() {
@@ -64,7 +71,8 @@ contract SimpleDAO {
     /// #if_succeeds proposals[_proposalId].hasVoted[msg.sender];
     /// #if_succeeds _support ? proposals[_proposalId].yesVotes == old(proposals[_proposalId].yesVotes) + tokenBalances[msg.sender] : 
     ///                  proposals[_proposalId].noVotes == old(proposals[_proposalId].noVotes) + tokenBalances[msg.sender];
-    function vote(uint256 _proposalId, bool _support) external onlyTokenHolder {
+    /// #invariant forall (address voter) tokenBalances[voter] > 0 ==> voter != address(0);
+    function vote(uint256 _proposalId, bool _support) external onlyTokenHolder onlyEligibleVoter {
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
