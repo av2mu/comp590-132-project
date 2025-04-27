@@ -48,7 +48,8 @@
 
 
 
-
+\section{Abstract}
+To be written
 
 
 \section{Introduction}
@@ -139,27 +140,16 @@ DAO contract voting vulnerabilities refers to a class of vulnerabilities where a
 \end{tikzpicture}
 \end{center}
 
-\section{Approach}
-Our approach uses Scribble and Mythril together to formally verify critical correctness properties in Ethereum-based DAO voting contracts. To begin, we identify essential governance rules found in most DAO implementations and articulate them into specific safety and liveness properties. Some key requirements include only token holders being able to vote, as well as prevention of double counting votes. These rules are expressed through Scribble annotations, which convert informal governance assumptions into precise assertions that are embedded into the Solidity contract. 
-
-Our verification approach targets three core properties critical to DAO smart contract security. First, we verify Single Vote Enforcement, confirming that each member is restricted to casting only one vote per proposal, preventing potential manipulation through multiple votes. Second, we ensure Authorized Access, validating that voting and proposal functionalities are limited exclusively to authorized DAO members, thus safeguarding against unauthorized interference. Lastly, we confirm Integrity of Proposal Outcome, ensuring the correctness and immutability of voting results once finalized, to protect decision-making from fraudulent or erroneous alterations. We annotate each property explicitly using Scribble, enabling Mythril to systematically verify these essential conditions.
-
-Once the properties are specified, we recompile the smart contract code using Scribble, then analyze it using Mythril’s symbolic execution engine. Mythril traverses possible execution paths, trying to invalidate the assertions that were defined earlier. If any violation is discovered by Mythril, it returns a counterexample and a symbolic execution path that led to the issue.
-
-Upon encountering counterexamples, we analyze whether these findings represent genuine logic flaws or overly restrictive specifications. If there is a genuine logic flaw, we will flag it for review, while the latter will cause us to refine our annotations. We will evaluate the performance of our verification framework by testing it on both authentic DAO contracts and synthetic contracts that are injected with known vulnerabilities. Our goal is to produce a streamlined workflow that runs lightweight yet rigorous annotation-driven formal verification to ensure that Ethereum-based DAO governance contracts are secure.
-
-We will first test synthetically vulnerable smart contracts specifically designed to contain known security flaws related to DAO voting. This initial step allows us to validate the correctness of our verification techniques in detecting deliberate vulnerabilities. After establishing confidence in our methodology, we will progress to analyzing a realistic and manageable contract such as MolochDAO v2[14], to test our verification framework in a practical but simplified real-world scenario.
-
-We began by successfully setting up Mythril and integrating Scribble annotations for formal verification. To validate our setup, we created a simplified DAO smart contract example, incorporating core DAO functionalities. We annotated the critical sections using Scribble to define security properties explicitly. Running Mythril against this annotated DAO allowed us to verify that our environment and workflow operate correctly, establishing a solid foundation for further verification of more complex real-world DAOs.
-
+\section{Implementation}
+To be written
 
 
 \section{Evaluation}
 
 This project investigates whether symbolic execution can be used to verify the safety and liveness properties of DAO voting functions. It also explores the scalability of this approach when applied to more complex voting mechanisms and assesses whether the method can be adapted to different DAOs' smart contracts. If automation isn't feasible, we want to investigate the manual effort required for adaptation. Our experiments will involve both toy examples and open-source smart contracts, focusing on analyzing DAO voting logic and defining the properties needed to verify it.
 
-\section{Plan of Work}
-We have already begun by studying the relevant tools, Scribble and Mythril, in order to understand the specification language and the way Mythril verifies security properties after they have been defined by Scribble. Next, we wrote a simple DAO contract, defined a security property in Slither, and verified the property using Mythril as an end-to-end test of our research procedure. We will go on to define security properties for each voting vulnerability in each smart contract that we plan to test. Over the next week we will verify the first three DAO contracts in our suite, and then in the final week we will verify the last two along with our final write-up. Our expected goal is to verify three different security properties in these five contracts. Our stretch goal would be to verify these properties in 10 contracts, but at minimum we expect to fully verify these properties in three contracts from our test suite.
+\section{Conclusion}
+To be written
 
 \section{Who Did What}
 \begin{itemize}
