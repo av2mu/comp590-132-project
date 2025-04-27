@@ -38,18 +38,7 @@ def run_mythril_analysis(contract_path, solc_json_path):
             "myth",
             "analyze",
             contract_path,
-            "--solc-json", solc_json_path,
             "--solv", "0.8.10",  # Specify Solidity version
-            "--execution-timeout", "120",  # 120 second timeout
-            "--max-depth", "5",  # Increased transaction depth for better coverage
-            "--solver-timeout", "120000",  # 120 second solver timeout
-            "--pruning-factor", "0.8",  # Pruning factor for state space
-            "--modules", "access_control",  # Focus specifically on access control
-            "--parallel-solving",  # Enable parallel solving
-            "--unconstrained-storage",  # Consider storage as unconstrained
-            "--call-depth-limit", "3",  # Limit call depth
-            "--strategy", "dfs",  # Use depth-first search strategy
-            "--transaction-count", "4"  # Increased transaction count for better coverage
         ]
         
         print(f"Running Mythril analysis on {contract_path}...")
