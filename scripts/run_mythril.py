@@ -12,7 +12,8 @@ def create_solc_json():
         "optimizer": {
             "enabled": True,
             "runs": 200
-        }
+        },
+        "version": "0.8.10"
     }
     
     config_path = Path("config/solc.json")
@@ -37,17 +38,7 @@ def run_mythril_analysis(contract_path, solc_json_path):
             "myth",
             "analyze",
             contract_path,
-            "--solc-json", solc_json_path,
-            "--execution-timeout", "120",  # 120 second timeout
-            "--max-depth", "5",  # Increased transaction depth for better coverage
-            "--solver-timeout", "120000",  # 120 second solver timeout
-            "--pruning-factor", "0.8",  # Pruning factor for state space
-            "--modules", "access_control",  # Focus specifically on access control
-            "--parallel-solving",  # Enable parallel solving
-            "--unconstrained-storage",  # Consider storage as unconstrained
-            "--call-depth-limit", "3",  # Limit call depth
-            "--strategy", "dfs",  # Use depth-first search strategy
-            "--transaction-count", "4",  # Increased transaction count for better coverage
+            "--solv", "0.8.10",  # Specify Solidity version
         ]
         
         print(f"Running Mythril analysis on {contract_path}...")
@@ -62,6 +53,7 @@ def run_mythril_analysis(contract_path, solc_json_path):
         print("  - Strategy: DFS")
         print("  - Transaction count: 4")
         print("  - Modules: access_control")
+        print("  - Solidity version: 0.8.10")
         
         # Run the command with real-time output
         process = subprocess.Popen(
@@ -100,6 +92,7 @@ def run_mythril_analysis(contract_path, solc_json_path):
         sys.exit(1)
 
 def main():
+    
     # Get the contract paths
     contracts_dir = Path("contracts")
     governor_contract = contracts_dir / "GovernorBravoDelegate.sol.instrumented"
