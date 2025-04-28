@@ -15,9 +15,7 @@ abstract contract AbstractSingleVoteSpec {
     /// @param proposalId The ID of the proposal
     /// @param voter The address to check
     /// @return Whether the address has voted
-    function hasVotedPure(uint256 proposalId, address voter) internal view virtual returns (bool) {
-        return hasVoted(proposalId, voter);
-    }
+    function hasVotedPure(uint256 proposalId, address voter) internal view virtual returns (bool);
 
     /// @notice Mark an address as having voted on a proposal
     /// @param proposalId The ID of the proposal
