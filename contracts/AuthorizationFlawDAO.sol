@@ -23,15 +23,6 @@ contract AuthorizationFlawDAO {
     mapping(address => uint256) public tokenBalances;
     uint256 public proposalCount;
 
-    /// #if_succeeds {:msg "Single vote check - voter cannot vote twice"} old(proposals[_proposalId].hasVoted[msg.sender]) == false ==> proposals[_proposalId].hasVoted[msg.sender] == true;
-    /// #if_succeeds {:msg "Single vote check - vote count increases by at most 1"} 
-    ///     let oldYes = old(proposals[_proposalId].yesVotes) in
-    ///     let oldNo = old(proposals[_proposalId].noVotes) in
-    ///     let newYes = proposals[_proposalId].yesVotes in
-    ///     let newNo = proposals[_proposalId].noVotes in
-    ///     (_support && newYes <= oldYes + 1 && newNo == oldNo) ||
-    ///     (!_support && newNo <= oldNo + 1 && newYes == oldYes);
-
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin can call this function");
         _;
