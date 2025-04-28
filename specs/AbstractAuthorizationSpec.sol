@@ -8,9 +8,7 @@ abstract contract AbstractAuthorizationSpec {
     /// @notice Get the voting power of an address
     /// @param voter The address to check voting power for
     /// @return The voting power of the address
-
     function getVotingPower(address voter) internal virtual view returns (uint256);
-
 
     /// @notice Get the voting power of an address (pure version for specifications)
     /// @param voter The address to check voting power for
@@ -21,7 +19,6 @@ abstract contract AbstractAuthorizationSpec {
 
     /// @notice Verify that only addresses with voting power can vote
     /// @param voter The address attempting to vote
-    /// #if_succeeds {:msg "Authorization"} getVotingPowerPure(voter) > 0;
     function verifyAuthorization(address voter) internal {
         require(getVotingPower(voter) > 0, "Must have voting power");
     }

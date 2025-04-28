@@ -15,6 +15,10 @@ contract AuthorizationFlawDAOSpecs is AuthorizationFlawDAO, AbstractAuthorizatio
         return tokenBalances[voter];
     }
 
+    /// @notice Vote on a proposal with authorization check
+    /// @param _proposalId The ID of the proposal to vote on
+    /// @param _support Whether to support the proposal
+    /// #if_succeeds {:msg "Authorization"} getVotingPowerPure(msg.sender) > 0;
     function vote(uint256 _proposalId, bool _support) override public {
         verifyAuthorization(msg.sender);
         Proposal storage proposal = proposals[_proposalId];
