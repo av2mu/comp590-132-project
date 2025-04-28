@@ -46,7 +46,10 @@ contract Association is owned, tokenRecipient {
     uint public debatingPeriodInMinutes;
     Proposal[] public proposals;
     uint public numProposals;
+    // Hard coded token to model token behavior for mythril
+    mapping(address => uint256) public mockBalanceOf;
     Token public sharesTokenAddress;
+
 
     event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
     event Voted(uint proposalID, bool position, address voter);
@@ -73,7 +76,7 @@ contract Association is owned, tokenRecipient {
 
     // Modifier that allows only shareholders to vote and create new proposals
     modifier onlyShareholders {
-        require(sharesTokenAddress.balanceOf(msg.sender) > 0);
+        require(mockBalanceOf[msg.sender] > 0);
         _;
     }
 
@@ -97,7 +100,8 @@ contract Association is owned, tokenRecipient {
      * @param minutesForDebate the minimum amount of delay between when a proposal is made and when it can be executed
      */
     function changeVotingRules(Token sharesAddress, uint minimumSharesToPassAVote, uint minutesForDebate) onlyOwner public {
-        sharesTokenAddress = Token(sharesAddress);
+        // Hardcoded shares
+        //sharesTokenAddress = Token(sharesAddress);
         if (minimumSharesToPassAVote == 0 ) minimumSharesToPassAVote = 1;
         minimumQuorum = minimumSharesToPassAVote;
         debatingPeriodInMinutes = minutesForDebate;
@@ -191,6 +195,8 @@ contract Association is owned, tokenRecipient {
      * @param proposalNumber number of proposal
      * @param supportsProposal either in favor or against it
      */
+    /// #if_succeeds {:msg "Only token holders can vote"} mockBalanceOf[msg.sender] > 0;
+    /// #if_succeeds {:msg "Single vote per address"} proposals[proposalNumber].voted[msg.sender];
     function vote(
         uint proposalNumber,
         bool supportsProposal
@@ -217,6 +223,7 @@ contract Association is owned, tokenRecipient {
      * @param proposalNumber proposal number
      * @param transactionBytecode optional: if the transaction contained a bytecode, you need to send it
      */
+    /// #if_succeeds {:msg "Quorum is met before execution"} hasQuorum(proposalNumber)
     function executeProposal(uint proposalNumber, bytes memory transactionBytecode) public {
         Proposal storage p = proposals[proposalNumber];
 
@@ -232,7 +239,7 @@ contract Association is owned, tokenRecipient {
 
         for (uint i = 0; i <  p.votes.length; ++i) {
             Vote storage v = p.votes[i];
-            uint voteWeight = sharesTokenAddress.balanceOf(v.voter);
+            uint voteWeight = mockBalanceOf[v.voter];
             quorum += voteWeight;
             if (v.inSupport) {
                 yea += voteWeight;
@@ -259,5 +266,16 @@ contract Association is owned, tokenRecipient {
 
         // Fire Events
         emit ProposalTallied(proposalNumber, yea - nay, quorum, p.proposalPassed);
+    }
+
+    // Helper function to check if quorum is reached
+    // Scribble does not provide functionality for summing over arrays
+    function hasQuorum(uint proposalNumber) public view returns (bool) {
+        Proposal storage p = proposals[proposalNumber];
+        uint q = 0;
+        for (uint i = 0; i < p.votes.length; ++i) {
+            q += mockBalanceOf[p.votes[i].voter];
+        }
+        return q >= minimumQuorum;
     }
 }
