@@ -51,7 +51,7 @@ contract ProposalFinalityFlaw {
     }
     // Intended functionality is that each user with tokens may vote on a proposal
     // Flawed logic in not checking if the proposal is active
-    function vote(uint256 _proposalId, bool _support) external onlyTokenHolder {
+    function vote(uint256 _proposalId, bool _support) external virtual onlyTokenHolder {
         Proposal storage proposal = proposals[_proposalId];
         require(!proposal.hasVoted[msg.sender], "Already voted");
         proposal.hasVoted[msg.sender] = true;

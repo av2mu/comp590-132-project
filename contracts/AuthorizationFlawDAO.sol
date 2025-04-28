@@ -51,7 +51,7 @@ contract AuthorizationFlawDAO {
     }
     // Intended functionality is that each user with tokens may vote on a proposal
     // Flawed logic in not checking if the user owns tokens
-    function vote(uint256 _proposalId, bool _support) external {
+    function vote(uint256 _proposalId, bool _support) external virtual {
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");

@@ -8,7 +8,9 @@ abstract contract AbstractAuthorizationSpec {
     /// @notice Get the voting power of an address
     /// @param voter The address to check voting power for
     /// @return The voting power of the address
+
     function getVotingPower(address voter) internal virtual view returns (uint256);
+
 
     /// @notice Get the voting power of an address (pure version for specifications)
     /// @param voter The address to check voting power for
