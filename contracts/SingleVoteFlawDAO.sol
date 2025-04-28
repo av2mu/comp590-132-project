@@ -26,6 +26,14 @@ contract SingleVoteFlawDAO {
     // Intended functionality is this function should only succeed if the user has not voted yet
     // Flawed logic in not checking for previous votes
     /// #if_succeeds {:msg "single-vote"} proposals[id].voted[msg.sender];
+    /// #if_succeeds {:msg "Only members can vote"} isMember[msg.sender];
+    /// #if_succeeds {:msg "Vote count increases by at most 1"} 
+    ///     let oldYes := old(proposals[id].yes) in
+    ///     let oldNo := old(proposals[id].no) in
+    ///     let newYes := proposals[id].yes in
+    ///     let newNo := proposals[id].no in
+    ///     (support && newYes <= oldYes + 1 && newNo == oldNo) ||
+    ///     (!support && newNo <= oldNo + 1 && newYes == oldYes);
     function vote(uint256 id, bool support) external {
         require(isMember[msg.sender], "not a member");
         Proposal storage p = proposals[id];
