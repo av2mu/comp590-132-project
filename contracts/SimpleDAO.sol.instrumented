@@ -5,7 +5,6 @@ pragma solidity ^0.8.29;
 
 /// @title SimpleDAO
 ///  @notice A simple DAO voting mechanism with token-weighted voting
-///  @dev Uses Scribble annotations for formal verification
 contract SimpleDAO {
     event ProposalCreated(uint256 indexed proposalId, string description);
 
@@ -32,29 +31,34 @@ contract SimpleDAO {
         uint256 old_2;
     }
 
+    struct vars4 {
+        uint256 old_3;
+        uint256 old_4;
+    }
+
     address public admin;
     mapping(uint256 => Proposal) public proposals;
     mapping(address => uint256) public tokenBalances;
     uint256 public proposalCount;
+    uint256 public constant QUORUM_THRESHOLD = 30;
+    uint256 public totalTokens;
 
-    /// #if_succeeds msg.sender == admin;
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin can call this function");
         _;
     }
 
-    /// #if_succeeds tokenBalances[msg.sender] > 0;
     modifier onlyTokenHolder() {
         require(tokenBalances[msg.sender] > 0, "Must be a token holder");
         _;
     }
 
-    /// #if_succeeds admin == msg.sender;
+    /// #if_succeeds {:msg "Admin is set in constructor"} admin == msg.sender;
     constructor() {
         admin = msg.sender;
         unchecked {
             if (!(admin == msg.sender)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("001605:0067:000 0: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("001643:0094:000 0: Admin is set in constructor");
                 assert(false);
             }
         }
@@ -68,23 +72,15 @@ contract SimpleDAO {
         RET_0 = _original_SimpleDAO_createProposal(_description, _votingPeriod);
         unchecked {
             if (!(msg.sender == admin)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("002102:0067:000 1: ");
-                assert(false);
-            }
-            if (!((_votingPeriod > 0) && (_votingPeriod <= 604800))) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("002303:0067:000 2: ");
-                assert(false);
-            }
-            if (!(proposals[proposalCount].startTime == block.timestamp)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("002509:0067:000 3: ");
-                assert(false);
-            }
-            if (!(proposals[proposalCount].endTime == (block.timestamp + _votingPeriod))) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("002731:0067:000 4: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("002167:0098:000 1: Only admin can create proposals");
                 assert(false);
             }
             if (!(proposalCount == (_v.old_0 + 1))) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("002915:0067:000 5: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("002382:0093:000 2: Proposal ID is incremented");
+                assert(false);
+            }
+            if (!((_votingPeriod > 0) && (_votingPeriod <= 604800))) {
+                emit __ScribbleUtilsLib__391.AssertionFailed("002609:0089:000 3: Voting period is valid");
                 assert(false);
             }
         }
@@ -101,7 +97,7 @@ contract SimpleDAO {
         return proposalId;
     }
 
-    function vote(uint256 _proposalId, bool _support) external {
+    function vote(uint256 _proposalId, bool _support) virtual external {
         vars2 memory _v;
         unchecked {
             _v.old_1 = proposals[_proposalId].yesVotes;
@@ -110,27 +106,15 @@ contract SimpleDAO {
         _original_SimpleDAO_vote(_proposalId, _support);
         unchecked {
             if (!(tokenBalances[msg.sender] > 0)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("004000:0067:000 6: ");
-                assert(false);
-            }
-            if (!(block.timestamp >= proposals[_proposalId].startTime)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("004204:0067:000 7: ");
-                assert(false);
-            }
-            if (!(block.timestamp <= proposals[_proposalId].endTime)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("004406:0067:000 8: ");
-                assert(false);
-            }
-            if (!(!proposals[_proposalId].hasVoted[msg.sender])) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("004603:0067:000 9: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("003724:0094:000 4: Only token holders can vote");
                 assert(false);
             }
             if (!(proposals[_proposalId].hasVoted[msg.sender])) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("004799:0068:000 10: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("003947:0090:000 5: Single vote per address");
                 assert(false);
             }
-            if (!(_support ? (proposals[_proposalId].yesVotes == (_v.old_1 + tokenBalances[msg.sender])) : (proposals[_proposalId].noVotes == (_v.old_2 + tokenBalances[msg.sender])))) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("005116:0068:000 11: ");
+            if (!(((!_support) || (proposals[_proposalId].yesVotes == (_v.old_1 + tokenBalances[msg.sender]))) && ((!(!_support)) || (proposals[_proposalId].noVotes == (_v.old_2 + tokenBalances[msg.sender]))))) {
+                emit __ScribbleUtilsLib__391.AssertionFailed("004313:0089:000 6: Vote weight is correct");
                 assert(false);
             }
         }
@@ -140,29 +124,27 @@ contract SimpleDAO {
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
+        require(!proposal.executed, "Proposal already finalized");
         require(!proposal.hasVoted[msg.sender], "Already voted");
         proposal.hasVoted[msg.sender] = true;
+        uint256 voteWeight = tokenBalances[msg.sender];
         if (_support) {
-            proposal.yesVotes += tokenBalances[msg.sender];
+            proposal.yesVotes += voteWeight;
         } else {
-            proposal.noVotes += tokenBalances[msg.sender];
+            proposal.noVotes += voteWeight;
         }
         emit VoteCast(_proposalId, msg.sender, _support);
     }
 
-    function finalize(uint256 _proposalId) external {
+    function finalize(uint256 _proposalId) virtual external {
         _original_SimpleDAO_finalize(_proposalId);
         unchecked {
-            if (!(block.timestamp > proposals[_proposalId].endTime)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("006118:0068:000 12: ");
-                assert(false);
-            }
-            if (!(!proposals[_proposalId].executed)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("006304:0068:000 13: ");
+            if (!((proposals[_proposalId].yesVotes + proposals[_proposalId].noVotes) >= ((totalTokens * QUORUM_THRESHOLD) / 100))) {
+                emit __ScribbleUtilsLib__391.AssertionFailed("005499:0080:000 7: Quorum is met");
                 assert(false);
             }
             if (!(proposals[_proposalId].executed)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("006489:0068:000 14: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("005696:0097:000 8: Proposal is marked as executed");
                 assert(false);
             }
         }
@@ -172,27 +154,36 @@ contract SimpleDAO {
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp > proposal.endTime, "Voting still in progress");
         require(!proposal.executed, "Proposal already executed");
+        uint256 totalVotes = proposal.yesVotes + proposal.noVotes;
+        require(totalVotes >= ((totalTokens * QUORUM_THRESHOLD) / 100), "Quorum not met");
         proposal.executed = true;
         bool passed = proposal.yesVotes > proposal.noVotes;
         emit ProposalExecuted(_proposalId, passed);
     }
 
     function setTokenBalance(address _account, uint256 _amount) external {
+        vars4 memory _v;
+        unchecked {
+            _v.old_3 = totalTokens;
+            _v.old_4 = tokenBalances[_account];
+        }
         _original_SimpleDAO_setTokenBalance(_account, _amount);
         unchecked {
             if (!(msg.sender == admin)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("007272:0068:000 15: ");
+                emit __ScribbleUtilsLib__391.AssertionFailed("006805:0100:000 9: Only admin can set token balances");
                 assert(false);
             }
-            if (!(tokenBalances[_account] == _amount)) {
-                emit __ScribbleUtilsLib__346.AssertionFailed("007460:0068:000 16: ");
+            if (!(totalTokens == ((_v.old_3 - _v.old_4) + _amount))) {
+                emit __ScribbleUtilsLib__391.AssertionFailed("007039:0101:000 10: Total tokens is updated correctly");
                 assert(false);
             }
         }
     }
 
     function _original_SimpleDAO_setTokenBalance(address _account, uint256 _amount) internal onlyAdmin() {
+        uint256 oldBalance = tokenBalances[_account];
         tokenBalances[_account] = _amount;
+        totalTokens = (totalTokens - oldBalance) + _amount;
     }
 
     function getProposal(uint256 _proposalId) external view returns (string memory description, uint256 yesVotes, uint256 noVotes, uint256 startTime, uint256 endTime, bool executed) {
@@ -201,7 +192,7 @@ contract SimpleDAO {
     }
 }
 
-library __ScribbleUtilsLib__346 {
+library __ScribbleUtilsLib__391 {
     event AssertionFailed(string message);
 
     event AssertionFailedData(int eventId, bytes encodingData);
