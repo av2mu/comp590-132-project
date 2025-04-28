@@ -5,7 +5,7 @@ pragma solidity ^0.8.20;
 /// @notice A simple DAO where proposals can be finalized without meeting quorum
 contract QuorumFlawDAO {
     uint256 public constant QUORUM = 2;
-    uint256 public totalVotes = 0;  // Concrete initialization
+    uint256 public totalVotes = 0;
     bool public isFinalized;
 
     constructor() {
@@ -13,11 +13,10 @@ contract QuorumFlawDAO {
         totalVotes = 0;
         isFinalized = false;
     }
-
+    // Intended functionality is this function should only succeed if totalVotes >= QUORUM
+    // Flawed logic in not checking quorum is reached
     /// #if_succeeds {:msg "quorum"} totalVotes >= QUORUM;
     function finalise() external {
-        // This function should only succeed if totalVotes >= QUORUM
-        // But we're not checking, creating a clear violation
         isFinalized = true;
     }
 

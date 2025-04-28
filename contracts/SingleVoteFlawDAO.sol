@@ -9,15 +9,13 @@ contract SingleVoteFlawDAO {
     struct Proposal {
         uint256 yes;
         uint256 no;
-        mapping(address => bool) voted;  // <-- intent: mark who has voted
+        mapping(address => bool) voted; 
     }
 
     mapping(uint256 => Proposal) public proposals;
     uint256 public proposalCount;
 
-    /* ----------- helper ----------- */
-
-    function register() external {                  // anyone may join
+    function register() external {                  
         isMember[msg.sender] = true;
     }
 
@@ -25,17 +23,17 @@ contract SingleVoteFlawDAO {
         return proposalCount++;
     }
 
-    /* ----------- VOTE (BUGGY) ----------- */
-
+    // Intended functionality is this function should only succeed if the user has not voted yet
+    // Flawed logic in not checking for previous votes
     /// #if_succeeds {:msg "single-vote"} proposals[id].voted[msg.sender];
-    ///     // Property: after a successful call, this voter must be marked as having voted.
-    ///     // (The implementation *forgets* to set it, so Mythril will reach a failure.)
     function vote(uint256 id, bool support) external {
         require(isMember[msg.sender], "not a member");
         Proposal storage p = proposals[id];
 
-        // ✗ BUG ✗  – no check & no bookkeeping
-        if (support) p.yes += 1;
-        else         p.no  += 1;
+        if (support) {
+            p.yes += 1;
+        } else {
+            p.no += 1;
+        }
     }
 } 
