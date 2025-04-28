@@ -11,7 +11,7 @@ contract AuthorizationFlawDAOSpecs is
     AbstractAuthorizationSpec {
 
     // Implementation of AbstractAuthorizationSpec
-    function getVotingPower(address voter) internal override returns (uint256) {
+    function getVotingPower(address voter) internal override view returns (uint256) {
         return tokenBalances[voter];
     }
 
