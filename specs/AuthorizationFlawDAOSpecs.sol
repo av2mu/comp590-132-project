@@ -15,6 +15,10 @@ contract AuthorizationFlawDAOSpecs is
         return tokenBalances[voter];
     }
 
+    function getVotingPowerPure(address voter) internal override view returns (uint256) {
+        return tokenBalances[voter];
+    }
+
     // Override AuthorizationFlawDAO's vote function to use our specs
     function vote(uint256 _proposalId, bool _support) public override {
         // Use our authorization spec

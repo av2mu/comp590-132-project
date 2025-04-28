@@ -15,6 +15,10 @@ contract SingleVoteFlawDAOSpecs is
         return proposals[proposalId].hasVoted[voter];
     }
 
+    function hasVotedPure(uint256 proposalId, address voter) internal override view returns (bool) {
+        return proposals[proposalId].hasVoted[voter];
+    }
+
     function markVoted(uint256 proposalId, address voter) internal override {
         proposals[proposalId].hasVoted[voter] = true;
     }

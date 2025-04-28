@@ -11,15 +11,15 @@ contract ProposalFinalityFlawSpecs is
     AbstractProposalFinalitySpec {
 
     // Implementation of AbstractProposalFinalitySpec
-    function isExecuted(uint256 proposalId) internal override returns (bool) {
+    function isExecuted(uint256 proposalId) internal override view returns (bool) {
         return proposals[proposalId].executed;
     }
 
-    function getYesVotes(uint256 proposalId) internal override returns (uint256) {
+    function getYesVotes(uint256 proposalId) internal override view returns (uint256) {
         return proposals[proposalId].yesVotes;
     }
 
-    function getNoVotes(uint256 proposalId) internal override returns (uint256) {
+    function getNoVotes(uint256 proposalId) internal override view returns (uint256) {
         return proposals[proposalId].noVotes;
     }
 
