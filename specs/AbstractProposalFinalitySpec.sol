@@ -30,6 +30,10 @@ abstract contract AbstractProposalFinalitySpec {
 
     /// @notice Verify that executed proposals' votes cannot change
     /// @param proposalId The ID of the proposal
+    /// #if_succeeds {:msg "Proposal finality"}
+    ///     !isExecuted(proposalId) || 
+    ///     (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
+    ///      getNoVotes(proposalId) == old(getNoVotes(proposalId)));
     function verifyProposalFinality(uint256 proposalId) internal {
         require(!isExecuted(proposalId), "Proposal already executed");
     }
