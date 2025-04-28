@@ -37,7 +37,7 @@ contract SimpleDAOSpecs is
     }
 
     // Implementation of AbstractProposalFinalitySpec
-    function proposalCount() internal override view returns (uint256) {
+    function getProposalCount() internal override view returns (uint256) {
         return proposalCount;
     }
 
