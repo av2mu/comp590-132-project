@@ -37,6 +37,10 @@ contract SimpleDAOSpecs is
     }
 
     // Implementation of AbstractProposalFinalitySpec
+    function proposalCount() internal override view returns (uint256) {
+        return proposalCount;
+    }
+
     function isExecuted(uint256 proposalId) internal override returns (bool) {
         return proposals[proposalId].executed;
     }

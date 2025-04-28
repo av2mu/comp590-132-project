@@ -6,10 +6,15 @@ pragma solidity ^0.8.29;
 /// @dev Concrete implementations must implement proposal state tracking
 /// #invariant {:msg "Proposal finality"} 
 ///     forall (uint256 proposalId) 
-///         isExecuted(proposalId) ==> 
-///             (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
-///              getNoVotes(proposalId) == old(getNoVotes(proposalId)));
+///         proposalId < proposalCount() ==> 
+///             (isExecuted(proposalId) ==> 
+///                 (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
+///                  getNoVotes(proposalId) == old(getNoVotes(proposalId))));
 abstract contract AbstractProposalFinalitySpec {
+    /// @notice Get the total number of proposals
+    /// @return The number of proposals
+    function proposalCount() internal virtual view returns (uint256);
+
     /// @notice Check if a proposal is executed
     /// @param proposalId The ID of the proposal
     /// @return Whether the proposal is executed
