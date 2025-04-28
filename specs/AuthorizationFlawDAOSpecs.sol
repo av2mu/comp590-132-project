@@ -1,37 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.29;
 
-import "./AbstractAuthorizationSpec.sol";
 import "../contracts/AuthorizationFlawDAO.sol";
+import "./AbstractAuthorizationSpec.sol";
 
 /// @title AuthorizationFlawDAOSpecs
 /// @notice Concrete implementation of authorization specs for AuthorizationFlawDAO
-contract AuthorizationFlawDAOSpecs is 
-    AuthorizationFlawDAO,
-    AbstractAuthorizationSpec {
-
-    // Implementation of AbstractAuthorizationSpec
-    function getVotingPower(address voter) internal override returns (uint256) {
+contract AuthorizationFlawDAOSpecs is AuthorizationFlawDAO, AbstractAuthorizationSpec {
+    function getVotingPower(address voter) override internal view returns (uint256) {
         return tokenBalances[voter];
     }
 
-    function getVotingPowerPure(address voter) internal override view returns (uint256) {
+    function getVotingPowerPure(address voter) override internal view returns (uint256) {
         return tokenBalances[voter];
     }
 
-    // Override AuthorizationFlawDAO's vote function to use our specs
-    function vote(uint256 _proposalId, bool _support) public override {
-        // Use our authorization spec
+    function vote(uint256 _proposalId, bool _support) override public {
         verifyAuthorization(msg.sender);
-
-        // Rest of AuthorizationFlawDAO's implementation
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
         require(!proposal.hasVoted[msg.sender], "Already voted");
         require(!proposal.executed, "Proposal already finalized");
         proposal.hasVoted[msg.sender] = true;
-
         if (_support) {
             proposal.yesVotes += 1;
         } else {
