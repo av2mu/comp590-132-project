@@ -4,6 +4,11 @@ pragma solidity ^0.8.29;
 /// @title AbstractProposalFinalitySpec
 /// @notice Abstract specification for proposal finality
 /// @dev Concrete implementations must implement proposal state tracking
+/// #invariant {:msg "Proposal finality"} 
+///     forall (uint256 proposalId) 
+///         isExecuted(proposalId) ==> 
+///             (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
+///              getNoVotes(proposalId) == old(getNoVotes(proposalId)));
 abstract contract AbstractProposalFinalitySpec {
     /// @notice Check if a proposal is executed
     /// @param proposalId The ID of the proposal
@@ -22,10 +27,6 @@ abstract contract AbstractProposalFinalitySpec {
 
     /// @notice Verify that executed proposals' votes cannot change
     /// @param proposalId The ID of the proposal
-    /// #invariant {:msg "Proposal finality"}
-    ///     isExecuted(proposalId) ==> 
-    ///         (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
-    ///          getNoVotes(proposalId) == old(getNoVotes(proposalId)));
     function verifyProposalFinality(uint256 proposalId) internal {
         require(!isExecuted(proposalId), "Proposal already executed");
     }
