@@ -29,6 +29,12 @@ contract ProposalFinalityFlaw {
         _;
     }
 
+    modifier onlyTokenHolder() {
+        require(tokenBalances[msg.sender] > 0, "Must be a token holder");
+        _;
+    }
+
+
     constructor() {
         admin = msg.sender;
     }
