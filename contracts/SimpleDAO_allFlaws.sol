@@ -64,15 +64,13 @@ contract SimpleDAO {
     ///     block.timestamp <= proposals[_proposalId].endTime;
     /// #if_succeeds {:msg "Pre: Proposal exists"} proposals[_proposalId].startTime > 0;
     /// #if_succeeds {:msg "Pre: Proposal not executed"} !proposals[_proposalId].executed;
-    function vote(uint256 _proposalId, bool _support) external virtual onlyTokenHolder {
+    function vote(uint256 _proposalId, bool _support) external virtual {
         Proposal storage proposal = proposals[_proposalId];
         require(proposal.startTime >= 0, "Proposal does not exist");
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
         require(!proposal.executed, "Proposal already finalized");
-        require(!proposal.hasVoted[msg.sender], "Already voted");
-
-        proposal.hasVoted[msg.sender] = true;
+        
         uint256 voteWeight = tokenBalances[msg.sender];
         if (_support) {
             proposal.yesVotes += voteWeight;
@@ -95,7 +93,6 @@ contract SimpleDAO {
         
         // Check if quorum is met (total votes must be at least 30% of total tokens)
         uint256 totalVotes = proposal.yesVotes + proposal.noVotes;
-        require(totalVotes >= (totalTokens * QUORUM_THRESHOLD) / 100, "Quorum not met");
         
         proposal.executed = true;
         bool passed = proposal.yesVotes > proposal.noVotes;
