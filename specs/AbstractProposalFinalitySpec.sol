@@ -5,11 +5,10 @@ pragma solidity ^0.8.29;
 /// @notice Abstract specification for proposal finality
 /// @dev Concrete implementations must implement proposal state tracking
 /// #invariant {:msg "Proposal finality"} 
-///     forall (uint256 proposalId) 
-///         proposalId < getProposalCount() ==> 
-///             (isExecuted(proposalId) ==> 
-///                 (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
-///                  getNoVotes(proposalId) == old(getNoVotes(proposalId))));
+///     forall (uint256 proposalId in [0..getProposalCount()))
+///         isExecuted(proposalId) ==> 
+///             (getYesVotes(proposalId) == old(getYesVotes(proposalId)) && 
+///              getNoVotes(proposalId) == old(getNoVotes(proposalId)));
 abstract contract AbstractProposalFinalitySpec {
     /// @notice Get the total number of proposals
     /// @return The number of proposals
