@@ -20,6 +20,8 @@ abstract contract AbstractAuthorizationSpec {
     /// @notice Verify that only addresses with voting power can vote
     /// @param voter The address attempting to vote
     function verifyAuthorization(address voter) internal {
-        require(getVotingPower(voter) > 0, "Must have voting power");
+        if (getVotingPower(voter) == 0) {
+            revert("Must have voting power");
+        }
     }
 } 
