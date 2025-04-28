@@ -20,7 +20,7 @@ contract AuthorizationFlawDAOSpecs is AuthorizationFlawDAO, AbstractAuthorizatio
     /// @param _support Whether to support the proposal
     /// #if_succeeds {:msg "Authorization"} getVotingPowerPure(msg.sender) > 0;
     function vote(uint256 _proposalId, bool _support) override public {
-        verifyAuthorization(msg.sender);
+        // Don't call verifyAuthorization here - we want to test the original flawed behavior
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
