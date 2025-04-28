@@ -28,11 +28,6 @@ contract SimpleDAO {
         _;
     }
 
-    modifier onlyTokenHolder() {
-        require(tokenBalances[msg.sender] > 0, "Must be a token holder");
-        _;
-    }
-
     constructor() {
         admin = msg.sender;
     }
@@ -48,13 +43,12 @@ contract SimpleDAO {
         return proposalId;
     }
 
-    function vote(uint256 _proposalId, bool _support) external onlyTokenHolder {
+    function vote(uint256 _proposalId, bool _support) external virtual {
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
-        require(!proposal.hasVoted[msg.sender], "Already voted");
         require(!proposal.executed, "Proposal already finalized");
-        proposal.hasVoted[msg.sender] = true;
+
         if (_support) {
             proposal.yesVotes += tokenBalances[msg.sender];
         } else {
@@ -63,7 +57,7 @@ contract SimpleDAO {
         emit VoteCast(_proposalId, msg.sender, _support);
     }
 
-    function finalize(uint256 _proposalId) external {
+    function finalize(uint256 _proposalId) external virtual {
         Proposal storage proposal = proposals[_proposalId];
         require(block.timestamp > proposal.endTime, "Voting still in progress");
         require(!proposal.executed, "Proposal already executed");
