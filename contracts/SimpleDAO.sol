@@ -35,14 +35,11 @@ contract SimpleDAO {
         _;
     }
 
-    /// #if_succeeds {:msg "Admin is set in constructor"} admin == msg.sender;
     constructor() {
         admin = msg.sender;
     }
 
     /// #if_succeeds {:msg "Only admin can create proposals"} msg.sender == admin;
-    /// #if_succeeds {:msg "Proposal ID is incremented"} proposalCount == old(proposalCount) + 1;
-    /// #if_succeeds {:msg "Voting period is valid"} _votingPeriod > 0 && _votingPeriod <= 7 days;
     function createProposal(string memory _description, uint256 _votingPeriod) external onlyAdmin returns (uint256) {
         require(_votingPeriod > 0 && _votingPeriod <= 7 days, "Invalid voting period");
         uint256 proposalId = proposalCount++;
@@ -62,8 +59,6 @@ contract SimpleDAO {
     /// #if_succeeds {:msg "Voting period is valid"} 
     ///     block.timestamp >= proposals[_proposalId].startTime && 
     ///     block.timestamp <= proposals[_proposalId].endTime;
-    /// #if_succeeds {:msg "Pre: Proposal exists"} proposals[_proposalId].startTime > 0;
-    /// #if_succeeds {:msg "Pre: Proposal not executed"} !proposals[_proposalId].executed;
     function vote(uint256 _proposalId, bool _support) external virtual onlyTokenHolder {
         Proposal storage proposal = proposals[_proposalId];
         require(proposal.startTime >= 0, "Proposal does not exist");
@@ -84,9 +79,6 @@ contract SimpleDAO {
 
     /// #if_succeeds {:msg "Quorum is met before execution"} 
     ///     (proposals[_proposalId].yesVotes + proposals[_proposalId].noVotes) >= (totalTokens * QUORUM_THRESHOLD) / 100;
-    /// #if_succeeds {:msg "Pre: Proposal exists"} proposals[_proposalId].startTime > 0;
-    /// #if_succeeds {:msg "Pre: Proposal not executed"} !proposals[_proposalId].executed;
-    /// #if_succeeds {:msg "Pre: Voting period ended"} block.timestamp > proposals[_proposalId].endTime;
     function finalize(uint256 _proposalId) external virtual {
         Proposal storage proposal = proposals[_proposalId];
         require(proposal.startTime >= 0, "Proposal does not exist");
@@ -103,8 +95,6 @@ contract SimpleDAO {
     }
 
     /// #if_succeeds {:msg "Only admin can modify balances"} msg.sender == admin;
-    /// #if_succeeds {:msg "Total tokens is updated correctly"} 
-    ///     totalTokens == old(totalTokens) - old(tokenBalances[_account]) + _amount;
     function setTokenBalance(address _account, uint256 _amount) external onlyAdmin {
         uint256 oldBalance = tokenBalances[_account];
         tokenBalances[_account] = _amount;
