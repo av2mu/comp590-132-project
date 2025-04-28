@@ -59,8 +59,14 @@ contract SimpleDAO {
     /// #if_succeeds {:msg "Vote weight is correct"} 
     ///     (_support ==> proposals[_proposalId].yesVotes == old(proposals[_proposalId].yesVotes) + tokenBalances[msg.sender]) &&
     ///     (!_support ==> proposals[_proposalId].noVotes == old(proposals[_proposalId].noVotes) + tokenBalances[msg.sender]);
+    /// #if_succeeds {:msg "Voting period is valid"} 
+    ///     block.timestamp >= proposals[_proposalId].startTime && 
+    ///     block.timestamp <= proposals[_proposalId].endTime;
+    /// #if_succeeds {:msg "Pre: Proposal exists"} proposals[_proposalId].startTime > 0;
+    /// #if_succeeds {:msg "Pre: Proposal not executed"} !proposals[_proposalId].executed;
     function vote(uint256 _proposalId, bool _support) external virtual onlyTokenHolder {
         Proposal storage proposal = proposals[_proposalId];
+        require(proposal.startTime > 0, "Proposal does not exist");
         require(block.timestamp >= proposal.startTime, "Voting not started");
         require(block.timestamp <= proposal.endTime, "Voting ended");
         require(!proposal.executed, "Proposal already finalized");
@@ -76,11 +82,14 @@ contract SimpleDAO {
         emit VoteCast(_proposalId, msg.sender, _support);
     }
 
-    /// #if_succeeds {:msg "Quorum is met"} 
+    /// #if_succeeds {:msg "Quorum is met before execution"} 
     ///     (proposals[_proposalId].yesVotes + proposals[_proposalId].noVotes) >= (totalTokens * QUORUM_THRESHOLD) / 100;
-    /// #if_succeeds {:msg "Proposal is marked as executed"} proposals[_proposalId].executed;
+    /// #if_succeeds {:msg "Pre: Proposal exists"} proposals[_proposalId].startTime > 0;
+    /// #if_succeeds {:msg "Pre: Proposal not executed"} !proposals[_proposalId].executed;
+    /// #if_succeeds {:msg "Pre: Voting period ended"} block.timestamp > proposals[_proposalId].endTime;
     function finalize(uint256 _proposalId) external virtual {
         Proposal storage proposal = proposals[_proposalId];
+        require(proposal.startTime > 0, "Proposal does not exist");
         require(block.timestamp > proposal.endTime, "Voting still in progress");
         require(!proposal.executed, "Proposal already executed");
         
@@ -93,7 +102,7 @@ contract SimpleDAO {
         emit ProposalExecuted(_proposalId, passed);
     }
 
-    /// #if_succeeds {:msg "Only admin can set token balances"} msg.sender == admin;
+    /// #if_succeeds {:msg "Only admin can modify balances"} msg.sender == admin;
     /// #if_succeeds {:msg "Total tokens is updated correctly"} 
     ///     totalTokens == old(totalTokens) - old(tokenBalances[_account]) + _amount;
     function setTokenBalance(address _account, uint256 _amount) external onlyAdmin {
