@@ -29,23 +29,3 @@
 ///     (totalTokens * QUORUM_THRESHOLD) / 100 || 
 ///     proposals[_proposalId].numberOfVotes >= minimumQuorum;
 
-// State Transition Properties
-/// @property {:msg "Proposal can only be executed after voting period"} 
-///     block.timestamp > proposals[_proposalId].endTime || 
-///     block.timestamp > proposals[_proposalId].minExecutionDate;
-
-/// @property {:msg "Proposal can only be executed once"} 
-///     proposals[_proposalId].executed == false;
-
-/// @property {:msg "Proposal can only be voted on if not executed"} 
-///     proposals[_proposalId].executed == false;
-
-// Precondition Properties (to be checked before function execution)
-/// @property {:msg "Pre: Proposal exists"} 
-///     proposals[_proposalId].startTime > 0;
-
-/// @property {:msg "Pre: Proposal not executed"} 
-///     !proposals[_proposalId].executed;
-
-/// @property {:msg "Pre: Voting period ended"} 
-///     block.timestamp > proposals[_proposalId].endTime; 
