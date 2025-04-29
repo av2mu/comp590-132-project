@@ -82,11 +82,12 @@ DAO contract voting vulnerabilities refers to a class of vulnerabilities where a
 \subsection{A Formal Model of DAO Smart Contracts}
 There is not a prescriptive structure that smart contracts must conform to in order to be considered DAOs, but there are some functionalities that are common to all implementations. All DAOs have a voting function in their contract that allows members to vote on proposals made by other members. We represent the general form of this voting function as a finite state machine that DAO members can interact with. We define the FSM as follows:
 \begin{center}
-$M = (Q, \Sigma, \delta, q_0, F)$
+$M = (Q, \Sigma, \delta, q_0, F, u, p, v)$
 \end{center}
 
-With $Q$ being the set of contract states, $\Sigma$ being the set of events, $\delta$ being the transition function mapping $Q\times\Sigma$, $q_0$ being the initial state, and $F$ being the set of terminal states. 
-We define the set $Q$ as follows:
+With $Q$ being the set of contract states, $\Sigma$ being the set of events, $\delta$ being the transition function mapping $Q\times\Sigma$, $q_0$ being the initial state, $F$ being the set of terminal states, $u$ being the user that is calling the DAO voting function (either manually or through another smart contract themselves), $p$ is the specific proposal being voted on, and $v$ is the intended vote of the user. All users $u$ have a unique DAO token balance $u_{balance}$ that is tracked by the contract. Additionally, we define $p_{user}$ as a function mapping of $P\times U$: for any given proposal and user, $p_{user}$ holds the current vote of that user. Given this function, we can also reason about a total vote count for each proposal defined as $p_{votes}$ as well as separate counts for each type of vote. For our model, we will only deal with two possible voting decisions, $p_{yes}$ and $p_{no}$, though actual implementations may allow DAO members more variation with the way they vote.
+
+We define the set of states $Q$ as follows:
 \begin{figure}[h]
 \caption{\textbf{The set $Q$}}
 \begin{center}
@@ -110,7 +111,7 @@ R & Vote canceled. Terminate interaction\\
 \end{center}
 \end{figure}
 
-And define the set $Sigma$ as follows:
+And define the set of events $Sigma$ as follows:
 \begin{figure}[h]
 \caption{\textbf{The set $\Sigma$}}
 \begin{center}
@@ -175,14 +176,23 @@ And finally provide a diagram of the finite state machine for the transition fun
 This formal model provides the foundation for our conception of DAO smart contracts. As our goal is to verify the voting functionality of DAOs, it follows that we are focused primarily on the \textit{Vote Validated} event transition, and this is where most of our verification efforts will take place. Defining what it means for a vote to be validated will lead us to introduce our security properties.
 
 \subsection{Security Properties for Secure DAO Voting}
-We define three properties for a secure DAO voting system:
+We describe three basic properties for a secure DAO voting system:
 \begin{enumerate}
     \item Singular Vote: A single member of the DAO should not be able to vote more than once, or have their vote count for more than one vote.
     \item Vote Authorization: Anyone can make a vote request using the contract, but only DAO members (holders of the particular DAO token) should be able to vote.
-    \item Vote Finality: Once the interaction between the member and the DAO contract is finished, the vote count should not revert or otherwise be changed by the actions of another member.
+    \item Quorum Threshold: For a DAO proposal to be finalized, a minimum portion of the total eligible voters need to have voted. This prevents proposals from being enacted that only got a single yes vote, for example.
 \end{enumerate}
 
-Properties 1 and 2 are collectively bundled as part of the \textit{Vote Validated} DAO contract event. Property 3 is covered in our model by the terminating path of execution and lack of looping. Each call of the vote function is treated as a separate execution. 
+We formalize these properties according to the $Vote\mbox{ }Validated$ event.
+For the $Vote\mbox{ }Validated$ event to trigger and to go from state $A$ to state $B$:
+\begin{center}
+$p_{user} = null \land u_{balance} > 0$. 
+\end{center}
+This ensures that potential voters are authorized members who have not already voted. We also need to define a second property to make sure that the proper behavior occurs when our contract terminates according to the current state of the FSM $q$ and previous state $q_{-1}$:
+\begin{center}
+    $q \in\{Y,N\}\xrightarrow{}p_{user} \neq null \land p_{votes} - q_{-1}$
+\end{center}
+
 
 \section{Implementation}
 To be written
@@ -203,7 +213,7 @@ To be written
 \end{itemize}
 
 \begin{thebibliography}{00}
-\bibitem{b1} J. Feist, G. Grieco, and A. Groce, “Slither: A static analysis framework for smart contracts,” 2019, pp. 8–15. doi: https://doi.org/10.1109/WETSEB.2019.00008. Available: \url{https://ieeexplore.ieee.org/abstract/document/8823898?casa_token=SNthQs5W2d0AAAAA:XwX332JMCkj3hw8XZd9nKBxe2bKJZ3v3yUNJ3jPtangZ3L2nISxh_rbY8fBW2zXkaWa0QnqgqVE}
+\bibitem{b1} J. Feist, G. Grieco, and A. Groce, “Slither: A static analysis framework for smart contracts,” 2019, pp. 8–15. Available: \url{https://ieeexplore.ieee.org/abstract/document/8823898?casa_token=SNthQs5W2d0AAAAA:XwX332JMCkj3hw8XZd9nKBxe2bKJZ3v3yUNJ3jPtangZ3L2nISxh_rbY8fBW2zXkaWa0QnqgqVE}
 \bibitem{b2} Z. Nehaï, P.-Y. Piriou, and F. Daumas, “Model-checking of smart contracts,” 2018, pp. 980–987. Available: \url{https://ieeexplore.ieee.org/abstract/document/8726806}
 \bibitem{b3} J. He, M. Balunović, N. Ambroladze, P. Tsankov, and M. Vechev, “Learning to Fuzz from Symbolic Execution with Application to Smart Contracts,” Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security, pp. 531–548, Nov. 2019, Available: \url{https://dl.acm.org/doi/abs/10.1145/3319535.3363230?casa_token=5cBcZneJt7oAAAAA:sPluGu-gtO_db3qLqHUcylo4ksy4Rx0FBkiEBFom7You4VltkgLyZanIwgg-WHfLDVmrwmU0MbdpGA}
 \bibitem{b4} N. Sharma and S. Sharma, “A Survey of Mythril, A Smart Contract Security Analysis Tool for EVM Bytecode,” Indian Journal of Natural Sciences, vol. 12, no. 75, Dec. 2022, Available:
