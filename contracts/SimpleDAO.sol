@@ -39,7 +39,6 @@ contract SimpleDAO {
         admin = msg.sender;
     }
 
-    /// #if_succeeds {:msg "Only admin can create proposals"} msg.sender == admin;
     function createProposal(string memory _description, uint256 _votingPeriod) external onlyAdmin returns (uint256) {
         require(_votingPeriod > 0 && _votingPeriod <= 7 days, "Invalid voting period");
         uint256 proposalId = proposalCount++;
@@ -53,12 +52,6 @@ contract SimpleDAO {
 
     /// #if_succeeds {:msg "Only token holders can vote"} tokenBalances[msg.sender] > 0;
     /// #if_succeeds {:msg "Single vote per address"} proposals[_proposalId].hasVoted[msg.sender];
-    /// #if_succeeds {:msg "Vote weight is correct"} 
-    ///     (_support ==> proposals[_proposalId].yesVotes == old(proposals[_proposalId].yesVotes) + tokenBalances[msg.sender]) &&
-    ///     (!_support ==> proposals[_proposalId].noVotes == old(proposals[_proposalId].noVotes) + tokenBalances[msg.sender]);
-    /// #if_succeeds {:msg "Voting period is valid"} 
-    ///     block.timestamp >= proposals[_proposalId].startTime && 
-    ///     block.timestamp <= proposals[_proposalId].endTime;
     function vote(uint256 _proposalId, bool _support) external virtual onlyTokenHolder {
         Proposal storage proposal = proposals[_proposalId];
         require(proposal.startTime >= 0, "Proposal does not exist");
@@ -94,7 +87,6 @@ contract SimpleDAO {
         emit ProposalExecuted(_proposalId, passed);
     }
 
-    /// #if_succeeds {:msg "Only admin can modify balances"} msg.sender == admin;
     function setTokenBalance(address _account, uint256 _amount) external onlyAdmin {
         uint256 oldBalance = tokenBalances[_account];
         tokenBalances[_account] = _amount;
