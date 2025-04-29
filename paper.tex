@@ -8,10 +8,8 @@
 \usepackage{graphicx}
 \usepackage{textcomp}
 \usepackage{xcolor}
-\usepackage{tikz}
 \usepackage{listings}
-\usepackage{xcolor}
-
+\usepackage{tikz}
 \lstset{
   basicstyle=\ttfamily\small,
   breaklines=true,
@@ -24,7 +22,6 @@
   commentstyle=\color{gray},
   language=, % <- no language syntax highlighting to prevent overflow issues
 }
-
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -96,12 +93,13 @@ DAO contract voting vulnerabilities refers to a class of vulnerabilities where a
 \section{Design}
 
 \subsection{A Formal Model of DAO Smart Contracts}
-There is not a prescriptive structure that smart contracts must conform to in order to be considered DAOs, but there are some functionalities that are common to all implementations. All DAOs have a voting function in their contract that allows members to vote on proposals made by other members. We represent the general form of this voting function as a finite state machine that DAO members can interact with. We define the FSM as follows:
+There is not a prescriptive structure that smart contracts must conform to in order to be considered DAOs, but there are some functionalities that are common to all implementations. All DAOs have a voting function in their contract that allows members to vote on proposals made by other members. We represent the general form of this voting function as a finite state machine related to a given proposal $p \in P$, the set of all proposals in the DAO contract. 
+We define the FSM as follows:
 \begin{center}
 $M = (Q, \Sigma, \delta, q_0, F, u, p, v)$
 \end{center}
 
-With $Q$ being the set of contract states, $\Sigma$ being the set of events, $\delta$ being the transition function mapping $Q\times\Sigma$, $q_0$ being the initial state, $F$ being the set of terminal states, $u$ being the user that is calling the DAO voting function (either manually or through another smart contract themselves), $p$ is the specific proposal being voted on, and $v$ is the intended vote of the user. All users $u$ have a unique DAO token balance $u_{balance}$ that is tracked by the contract. Additionally, we define $p_{user}$ as a function mapping of $P\times U$: for any given proposal and user, $p_{user}$ holds the current vote of that user. Given this function, we can also reason about a total vote count for each proposal defined as $p_{votes}$ as well as separate counts for each type of vote. For our model, we will only deal with two possible voting decisions, $p_{yes}$ and $p_{no}$, though actual implementations may allow DAO members more variation with the way they vote.
+With $Q$ being the set of voting function states, $\Sigma$ being the set of events triggering changes in state, $\delta$ being the transition function mapping $Q\times\Sigma$, $q_0$ being the initial state, $F$ being the set of terminal states, $u$ being the user that is calling the DAO voting function (either manually or through another smart contract themselves), $p$ is the specific proposal being voted on, and $v$ is the intended vote of the user. All users $u$ have a unique DAO token balance $u_{balance}$ that is tracked by the contract. Additionally, we define $p_{user}$ as a function mapping of $P\times U$: for any given proposal and user, $p_{user}$ holds the current vote of that user. Given this function, we can also reason about a total vote count for each proposal defined as $p_{votes}$ as well as separate counts for each type of vote. For our model, we will only deal with two possible voting decisions, $p_{yes}$ and $p_{no}$, though actual implementations may allow DAO members more variation with the way they vote.
 
 We define the set of states $Q$ as follows:
 \begin{figure}[h]
@@ -111,17 +109,19 @@ We define the set of states $Q$ as follows:
 \hline
 State & Description\\
 \hline
-$q_0$ & Initial state. Contract is inert.\\
+$q_0$ & Initial state. $u, v = null$\\
 \hline
-A & Vote request initiated. Voter identity set\\
+$q_1$ & $u, v$ are set based on vote request\\
 \hline
-B & Vote request validated\\
+$q_2$ & $p_{u} = null, u_{balance} > 0$\\
 \hline
-Y & Vote total updated in favor. Terminate interaction \\
+$Y$ & $p_{yes} += 1$ \\
 \hline
-N & Vote total updated against. Terminate interaction\\
+$N$ & $p_{no} += 1$\\
 \hline
-R & Vote canceled. Terminate interaction\\
+$R$ & $u = null$\\
+\hline
+$F$ & Proposal voting period ends\\
 \hline
 \end{tabular}
 \end{center}
@@ -145,30 +145,34 @@ Vote no & Member votes against\\
 \hline
 Vote rejected & Vote request is invalid (explained below)\\
 \hline
+End & End transaction with user and return to initial state\\
+\hline
+Voting ends & Voting window for the proposal window closes\\
+\hline
 \end{tabular}
 \end{center}
 \end{figure}
 
-And finally provide a diagram of the finite state machine for the transition function (Figure 1). Terminating states are indicated with double rings.
+And finally provide a diagram of the finite state machine for the transition function (Figure 3). Terminating states are indicated with double rings.
 \begin{figure}[h]
 \begin{center}
-\begin{tikzpicture}[scale=0.2]
+\begin{tikzpicture}[scale=0.1705]
 \tikzstyle{every node}+=[inner sep=0pt]
 \draw [black] (36.9,-9.6) circle (3);
 \draw (36.9,-9.6) node {$q_0$};
 \draw [black] (36.9,-22) circle (3);
-\draw (36.9,-22) node {$A$};
+\draw (36.9,-22) node {$q_1$};
 \draw [black] (36.9,-33.6) circle (3);
-\draw (36.9,-33.6) node {$B$};
+\draw (36.9,-33.6) node {$q_2$};
 \draw [black] (55.8,-22) circle (3);
 \draw (55.8,-22) node {$R$};
-\draw [black] (55.8,-22) circle (2.4);
-\draw [black] (45.7,-45.7) circle (3);
-\draw (45.7,-45.7) node {$N$};
-\draw [black] (45.7,-45.7) circle (2.4);
-\draw [black] (28.3,-45.7) circle (3);
-\draw (28.3,-45.7) node {$Y$};
-\draw [black] (28.3,-45.7) circle (2.4);
+\draw [black] (44.2,-41) circle (3);
+\draw (44.2,-41) node {$N$};
+\draw [black] (28.9,-41) circle (3);
+\draw (28.9,-41) node {$Y$};
+\draw [black] (36.9,-56.3) circle (3);
+\draw (36.9,-56.3) node {$F$};
+\draw [black] (36.9,-56.3) circle (2.4);
 \draw [black] (36.9,-12.6) -- (36.9,-19);
 \fill [black] (36.9,-19) -- (37.4,-18.2) -- (36.4,-18.2);
 \draw (36.4,-15.8) node [left] {$Vote\mbox{ }function\mbox{ }called$};
@@ -178,16 +182,33 @@ And finally provide a diagram of the finite state machine for the transition fun
 \draw [black] (39.9,-22) -- (52.8,-22);
 \fill [black] (52.8,-22) -- (52,-21.5) -- (52,-22.5);
 \draw (46.35,-22.5) node [below] {$Vote\mbox{ }rejected$};
-\draw [black] (38.66,-36.03) -- (43.94,-43.27);
-\fill [black] (43.94,-43.27) -- (43.87,-42.33) -- (43.06,-42.92);
-\draw (41.89,-38.27) node [right] {$Vote\mbox{ }no$};
-\draw [black] (35.16,-36.05) -- (30.04,-43.25);
-\fill [black] (30.04,-43.25) -- (30.91,-42.89) -- (30.09,-42.31);
-\draw (32.01,-38.28) node [left] {$Vote\mbox{ }yes$};
+\draw [black] (39.01,-35.74) -- (42.09,-38.86);
+\fill [black] (42.09,-38.86) -- (41.89,-37.94) -- (41.18,-38.65);
+\draw (41.08,-35.83) node [right] {$Vote\mbox{ }no$};
+\draw [black] (34.7,-35.64) -- (31.1,-38.96);
+\fill [black] (31.1,-38.96) -- (32.03,-38.79) -- (31.35,-38.05);
+\draw (28.99,-36.81) node [above] {$Vote\mbox{ }yes$};
+\draw [black] (53.29,-20.35) -- (39.41,-11.25);
+\fill [black] (39.41,-11.25) -- (39.8,-12.1) -- (40.35,-11.27);
+\draw (48.46,-15.3) node [above] {$End$};
+\draw [black] (25.96,-40.423) arc (-106.3473:-282.23982:16.379);
+\fill [black] (34.04,-8.7) -- (33.37,-8.04) -- (33.15,-9.02);
+\draw (13.94,-20.19) node [left] {$End$};
+\draw [black] (39.724,-8.599) arc (104.2931:-78.11737:16.458);
+\fill [black] (39.72,-8.6) -- (40.62,-8.89) -- (40.38,-7.92);
+\draw (60.57,-20.41) node [right] {$End$};
+\draw [black] (30.29,-43.66) -- (35.51,-53.64);
+\fill [black] (35.51,-53.64) -- (35.58,-52.7) -- (34.7,-53.16);
+\draw (32.22,-49.8) node [left] {$Voting\mbox{ }ends$};
+\draw [black] (42.91,-43.71) -- (38.19,-53.59);
+\fill [black] (38.19,-53.59) -- (38.99,-53.09) -- (38.09,-52.66);
+\draw (41.26,-49.71) node [right] {$Voting\mbox{ }ends$};
 \end{tikzpicture}
 \end{center}
 \caption{DAO Voting contract Finite State Machine}
 \end{figure}
+
+As stated above, this model represents the possible state space for the voting function of a given proposal. 
 
 This formal model provides the foundation for our conception of DAO smart contracts. As our goal is to verify the voting functionality of DAOs, it follows that we are focused primarily on the \textit{Vote Validated} event transition, and this is where most of our verification efforts will take place. Defining what it means for a vote to be validated will lead us to introduce our security properties.
 
@@ -204,67 +225,173 @@ For the $Vote\mbox{ }Validated$ event to trigger and to go from state $A$ to sta
 \begin{center}
 $p_{user} = null \land u_{balance} > 0$. 
 \end{center}
-This ensures that potential voters are authorized members who have not already voted. We also need to define a second property to make sure that the proper behavior occurs when our contract terminates according to the current state of the FSM $q$ and previous state $q_{-1}$:
+This ensures that potential voters are authorized members who have not already voted. We also need to define a second property to make sure that the proper behavior occurs when our contract terminates according to the current state of the FSM $q$ and initial state $q_{0}$:
 \begin{center}
-    $q \in\{Y,N\}\xrightarrow{}p_{user} \neq null \land p_{votes} - q_{-1}$
+    $q \in\{Y,N\}\xrightarrow{}p_{user} \neq null \land p_{votes} - p_{votes}^0 = 1$
 \end{center}
 
+Where $p_{votes}^0$ is the value of $p_{votes}$ in the initial state of execution $q_0$. This ensures that votes are counted once and only once. 
+
+The final security property, Quorum Threshold, 
 
 \section{Implementation}
 \subsection{Workflow}
-The basic voting security properties are applied to the selected smart contracts using the Scribble specification language. This takes the form of high-level annotations applied to the target functions in the smart contract code. These annotated files are then instrumented by Scribble to automatically generate Solidity code with the desired assertions and exceptions. The instrumented files are analyzed with Mythril to discover execution paths that violate the voting security properties.
+
+We started by defining our basic voting security properties in the DAOProperties.spec file. 
+
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+    /// @title DAO Properties Specification
+    /// @notice Abstract properties that should hold for any DAO implementation
+
+    /// @property {:msg "Only token holders can vote"} 
+    ///     tokenBalances[msg.sender] > 0 || isMember[msg.sender] == true;
+
+    /// @property {:msg "Single vote per address"} 
+    ///     proposals[_proposalId].hasVoted[msg.sender] == true;
+
+    /// @property {:msg "Quorum is met before execution"} 
+    ///     (proposals[_proposalId].yesVotes + proposals[_proposalId].noVotes) >= 
+    ///     (totalTokens * QUORUM_THRESHOLD) / 100 || 
+    ///     proposals[_proposalId].numberOfVotes >= minimumQuorum;
+\end{lstlisting}
+
+
+We then manually annotated the target functions in the smart contract code with these properties. When we run Scribble on the annotated contract, it rewrites the Solidity source contract so that every property becomes a run-time assertion. We then feed this instrumented contract to Mythril, which symbolically explores all possible execution paths. If Mythril finds a path that violates one of our annotated conditions, it raises an AssertionFailed event with a corresponding message. 
+
+Before we tried to annotate real world contracts, we built three deliberately flawed “toy” contracts: one for each vulnerability we were focusing on. This allowed us to tune our Scribble annotations on a simple contract with a much faster turnaround than having to wait hours for a complex contract to finish evaluating. 
+
+The first toy contract (Figure 1) omits any check on a caller’s token balance, so non-holders can vote freely. The second (Figure 2) remembers votes in a mapping but never consults that mapping, allowing the same address to vote twice. The third (Figure 3) allows execution as soon as a “yes” majority exists, without verifying that the total number of votes meets the quorum threshold.
+
+
+
+
 \subsection{Toy Examples}
-\begin{figure}[h]
-\centering
-\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
-    // Flawed logic in not checking for previous votes
-    
-    /// #if_succeeds {:msg "single-vote"} proposals[id].voted[msg.sender];
-    
-    function vote(uint256 id, bool support) external {
-        require(isMember[msg.sender], "not a member");
-        Proposal storage p = proposals[id];
-
-        if (support) {
-            p.yes += 1;
-        } else {
-            p.no += 1;
-        }
-    }
-\end{lstlisting}
-\caption{Basic single vote flaw.}
-\label{fig:vote_function}
-\end{figure}
-
-\subsubsection{Singular Vote} 
 
 \begin{figure}[h]
 \centering
 \begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
-    // Flawed logic in not checking for previous votes
+    // Flawed logic: No token balance check
     
-    /// #if_succeeds {:msg "single-vote"} proposals[id].voted[msg.sender];
+    /// @property {:msg "Only token holders can vote"} 
+    ///     tokenBalances[msg.sender] > 0 || isMember[msg.sender] == true;
     
-    function vote(uint256 id, bool support) external {
-        require(isMember[msg.sender], "not a member");
-        Proposal storage p = proposals[id];
-
+    function vote(uint256 proposalId, bool support) external {
+        // Missing token balance check
+        Proposal storage p = proposals[proposalId];
+        
         if (support) {
-            p.yes += 1;
+            p.yesVotes += 1;
         } else {
-            p.no += 1;
+            p.noVotes += 1;
+        }
+        p.numberOfVotes += 1;
+    }
+\end{lstlisting}
+\caption{Authorization property: Only token holders can vote.}
+\label{fig:auth_property}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+    // Flawed logic: No check for previous votes
+    
+    /// @property {:msg "Single vote per address"} 
+    ///     proposals[_proposalId].hasVoted[msg.sender] == true;
+    
+    function vote(uint256 proposalId, bool support) external {
+        require(tokenBalances[msg.sender] > 0, "No tokens");
+        Proposal storage p = proposals[proposalId];
+        
+        // Missing hasVoted check
+        if (support) {
+            p.yesVotes += 1;
+        } else {
+            p.noVotes += 1;
+        }
+        p.numberOfVotes += 1;
+    }
+\end{lstlisting}
+\caption{Single vote property: Each address can only vote once per proposal.}
+\label{fig:single_vote_property}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+    // Flawed logic: No quorum check before execution
+    
+    /// @property {:msg "Quorum is met before execution"} 
+    ///     (proposals[_proposalId].yesVotes + proposals[_proposalId].noVotes) >= 
+    ///     (totalTokens * QUORUM_THRESHOLD) / 100 || 
+    ///     proposals[_proposalId].numberOfVotes >= minimumQuorum;
+    
+    function executeProposal(uint256 proposalId) external {
+        Proposal storage p = proposals[proposalId];
+        
+        // Missing quorum check
+        if (p.yesVotes > p.noVotes) {
+            // Execute proposal
+            p.executed = true;
         }
     }
 \end{lstlisting}
-\caption{Basic single vote flaw.}
-\label{fig:vote_function}
+\caption{Quorum property: Quorum must be met before execution.}
+\label{fig:quorum_property}
 \end{figure}
-
-
-
 \section{Evaluation}
+We evaluate 4 DAO smart contracts using the workflow outlined in Section VII. 
+\subsection{SimpleDAO} The first contract we examine is SimpleDAO. We create SimpleDAO as a basic DAO with token-weighted voting, quorum-dependent proposal execution, and self-contained code with no external calls. The Mythril symbolic execution analyzes the instrumented Solidity file finding no violation of the voting security properties.
+\subsection{FlawedDAO} The second example contract is FlawedDAO. This is a basic DAO contract that violates all of the voting security properties as a demonstration. The Mythril analysis of the contract results in the marking of all three violations.
+\subsection{dao-congress} The original specifications were designed for a token-based voting system, which we had to modify to accommodate the membership-based architecture of the Congress DAO implementation. For the authorization property, we replaced the token balance check with a membership verification, ensuring that only registered members (where memberId[msg.sender] != 0) can participate in voting. The single-vote-per-address property was implemented by verifying the state of the voted mapping after each vote transaction. Finally, the quorum requirement was adapted from a percentage-based token threshold to a simple vote count comparison against a minimum quorum value. 
 
-This project investigates whether symbolic execution can be used to verify the safety and liveness properties of DAO voting functions. It also explores the scalability of this approach when applied to more complex voting mechanisms and assesses whether the method can be adapted to different DAOs' smart contracts. If automation isn't feasible, we want to investigate the manual effort required for adaptation. Our experiments will involve both toy examples and open-source smart contracts, focusing on analyzing DAO voting logic and defining the properties needed to verify it.
+\begin{figure}[h]
+\centering
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+SWC ID: 110
+Severity: Medium
+Contract: FlawedDAO
+Function name: finalize(uint256)
+PC address: 913
+Estimated Gas Usage: 16596 - 39024
+A user-provided assertion failed.
+--------------------
+In file: contracts/FlawedDAO.sol:123
+__ScribbleUtilsLib__373.AssertionFailed ("004763:0097:000 6: Quorum is met before execution")
+--------------------
+
+==== Exception State ====
+SWC ID: 110
+Severity: Medium
+Contract: FlawedDAO
+Function name: vote(uint256,bool)
+PC address: 1993
+Estimated Gas Usage: 13941 - 36039
+A user-provided assertion failed.
+--------------------
+In file: contracts/FlawedDAO.sol:94
+__ScribbleUtilsLib__373.AssertionFailed( "003414:0094:000 4: Only token holders can vote")
+--------------------
+==== Exception State ====
+SWC ID: 110
+Severity: Medium
+Contract: FlawedDAO
+Function name: vote(uint256,bool)
+PC address: 2157
+Estimated Gas Usage: 14962 - 37770
+A user-provided assertion failed.
+--------------------
+In file: contracts/FlawedDAO.sol:98
+__ScribbleUtilsLib__373.AssertionFailed ("003637:0090:000 5: Single vote per address")
+--------------------
+\end{lstlisting}
+\caption{Mythril output flagging property violations in \texttt{FlawedDAO}.}
+\label{fig:flawed_dao_assertions}
+\end{figure}
+
+\subsection{Association} The fourth contract we evaluate is Association CITE. This is an open-source DAO contract developed by the Ethereum Foundation. This contract represents a shareholder-controlled organization in which token holders vote on transactions that send funds to the proposed recipient. This contract is more complex than the previous examples, containing external calls to the \texttt{Token} interface and inheriting from two contracts. Mythril models external calls conservatively, assuming that the called function can result in any return. To accurately model the authorization property correctly, we create a hard-coded \texttt{mockBalanceOf} mapping locally that allows Mythril to reason about \texttt{sharesTokenAddress.balanceOf()} properly. For the quorum property, we add a helper function \texttt{hasQuorum()} to count the proposal's proportion of shares stored in an array of vote objects. This is done because Scribble does not provide functionality to loop and sum over an array.
+The greater complexity of the Association contract resulted in a state space explosion; unbounded symbolic execution of the contract led to segmentation faults and run times exceeding an hour. To counteract this, we tested the properties separately with bounded depth and runtime. During these bounded analyses, all three voting security properties held.
+
 
 \section{Conclusion}
 To be written
