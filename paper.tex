@@ -9,6 +9,22 @@
 \usepackage{textcomp}
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  breakatwhitespace=true,
+  columns=fullflexible,
+  keepspaces=true,
+  frame=single,
+  numbers=none,
+  keywordstyle=\color{blue},
+  commentstyle=\color{gray},
+  language=, % <- no language syntax highlighting to prevent overflow issues
+}
+
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
@@ -195,7 +211,55 @@ This ensures that potential voters are authorized members who have not already v
 
 
 \section{Implementation}
-To be written
+\subsection{Workflow}
+The basic voting security properties are applied to the selected smart contracts using the Scribble specification language. This takes the form of high-level annotations applied to the target functions in the smart contract code. These annotated files are then instrumented by Scribble to automatically generate Solidity code with the desired assertions and exceptions. The instrumented files are analyzed with Mythril to discover execution paths that violate the voting security properties.
+\subsection{Toy Examples}
+\begin{figure}[h]
+\centering
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+    // Flawed logic in not checking for previous votes
+    
+    /// #if_succeeds {:msg "single-vote"} proposals[id].voted[msg.sender];
+    
+    function vote(uint256 id, bool support) external {
+        require(isMember[msg.sender], "not a member");
+        Proposal storage p = proposals[id];
+
+        if (support) {
+            p.yes += 1;
+        } else {
+            p.no += 1;
+        }
+    }
+\end{lstlisting}
+\caption{Basic single vote flaw.}
+\label{fig:vote_function}
+\end{figure}
+
+\subsubsection{Singular Vote} 
+
+\begin{figure}[h]
+\centering
+\begin{lstlisting}[basicstyle=\ttfamily\small,breaklines=true]
+    // Flawed logic in not checking for previous votes
+    
+    /// #if_succeeds {:msg "single-vote"} proposals[id].voted[msg.sender];
+    
+    function vote(uint256 id, bool support) external {
+        require(isMember[msg.sender], "not a member");
+        Proposal storage p = proposals[id];
+
+        if (support) {
+            p.yes += 1;
+        } else {
+            p.no += 1;
+        }
+    }
+\end{lstlisting}
+\caption{Basic single vote flaw.}
+\label{fig:vote_function}
+\end{figure}
+
 
 
 \section{Evaluation}
