@@ -6,7 +6,8 @@
 ```
 .
 ├── contracts/          # Solidity contracts with Scribble instrumentation
-└── package.json            # Node.js dependenciess
+├── DAOProperties.spec  # Specification file to state DAO properties
+└── package.json        # Node.js dependenciess
 ```
 
 ## Prerequisites
@@ -46,7 +47,7 @@ Replace `SimpleDAO.sol` with the contract you want to analyze.
 - `SingleVoteFlawDAO.sol`: DAO with single vote vulnerability
 - `QuorumFlawDAO.sol`: DAO with quorum-related vulnerabilities
 - `AuthorizationFlawDAO.sol`: DAO with authorization-related vulnerabilities
-- `DAOProperties.spec`: Specification file to state DAO properties
+
 
 ## Analysis Options
 
