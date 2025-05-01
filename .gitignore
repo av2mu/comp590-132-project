@@ -7,13 +7,6 @@ yarn-error.log
 # Python virtual environment
 .venv/
 
-# Hardhat files
-cache/
-artifacts/
-coverage/
-coverage.json
-typechain/
-typechain-types/
 
 # Environment variables
 .env
@@ -38,5 +31,3 @@ out/
 logs/
 *.log
 
-# Instrumented contracts (if using Scribble)
-instrumented/ 
