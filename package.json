@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "eth-scribble": "^0.7.10",
+    "solc": "^0.8.19"
+  }
+}
